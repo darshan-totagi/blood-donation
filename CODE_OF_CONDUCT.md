@@ -2,7 +2,7 @@
 
 ## Our Pledge
 
-As contributors, maintainers, and members of the **Veltrian** community, we are dedicated to creating a welcoming, inclusive, and harassment-free environment for everyone.  
+As contributors, maintainers, and members of the **blood-donation** community, we are dedicated to creating a welcoming, inclusive, and harassment-free environment for everyone.  
 
 We celebrate diversity and do not tolerate discrimination based on:
 
