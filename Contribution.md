@@ -6,7 +6,7 @@ Please take a moment to review this document to make the contribution process as
 
 ## 🤝 Code of Conduct
 
-This project and everyone participating in it is governed by the [Code of Conduct](./CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior by **creating an Issue marked 'Code of Conduct Violation'**.
+This project and everyone participating in it is governed by the [Code of Conduct](#Need to add ). By participating, you are expected to uphold this code. Please report unacceptable behavior by **creating an Issue marked 'Code of Conduct Violation'**.
 
 ---
 
