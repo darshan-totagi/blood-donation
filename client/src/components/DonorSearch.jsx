@@ -41,7 +41,7 @@ function DonorSearch() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-rose-100 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-rose-100 p-6 pt-24">
       <div className="max-w-6xl mx-auto space-y-8">
 
         {/* Blood group availability */}

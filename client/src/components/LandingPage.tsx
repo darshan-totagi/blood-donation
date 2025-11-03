@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 function LandingPage() {
   const navigate = useNavigate();
 
-  const scrollToSection = (id) => {
+  const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
@@ -14,19 +14,6 @@ function LandingPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Navbar */}
-      <nav className="fixed top-0 left-0 w-full bg-red-500/60 backdrop-blur-md text-white shadow-md z-50">
-
-        <div className="container mx-auto flex justify-between items-center py-4 px-6">
-          <h1 className="text-2xl font-bold">BloodConnect</h1>
-          <div className="flex gap-6">
-            <button onClick={() => scrollToSection("hero")} className="hover:text-gray-200">Home</button>
-            <button onClick={() => scrollToSection("why-donate")} className="hover:text-gray-200">Why Donate</button>
-            <button onClick={() => scrollToSection("how-it-works")} className="hover:text-gray-200">How It Works</button>
-            <button onClick={() => scrollToSection("contact")} className="hover:text-gray-200">Contact</button>
-          </div>
-        </div>
-      </nav>
 
       {/* Hero Section */}
       <section
