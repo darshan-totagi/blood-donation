@@ -29,7 +29,7 @@ function DonorRegistration() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center">
+    <div className="relative min-h-screen flex items-center justify-center pt-20">
       {/* Background Video */}
       <div className="absolute inset-0">
   <img
