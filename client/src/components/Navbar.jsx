@@ -9,12 +9,39 @@ function Navbar() {
       <div className="container mx-auto flex justify-between items-center py-4 px-6">
         <h1 className="text-2xl font-bold">BloodConnect</h1>
         <div className="flex gap-6">
-          <button onClick={() => navigate("/")} className="hover:text-gray-200">Home</button>
-          <button onClick={() => navigate("/#why-donate")} className="hover:text-gray-200">Why Donate</button>
-          <button onClick={() => navigate("/#how-it-works")} className="hover:text-gray-200">How It Works</button>
-          <button onClick={() => navigate("/register")} className="hover:text-gray-200">Register</button>
-          <button onClick={() => navigate("/search")} className="hover:text-gray-200">Find Donors</button>
-          <button onClick={() => navigate("/#contact")} className="hover:text-gray-200">Contact</button>
+          <button onClick={() => navigate("/")} className="hover:text-gray-200">
+            Home
+          </button>
+          <button
+            onClick={() => navigate("/#why-donate")}
+            className="hover:text-gray-200"
+          >
+            Why Donate
+          </button>
+          <button
+            onClick={() => navigate("/#how-it-works")}
+            className="hover:text-gray-200"
+          >
+            How It Works
+          </button>
+          <button
+            onClick={() => navigate("/register")}
+            className="hover:text-gray-200"
+          >
+            Register
+          </button>
+          <button
+            onClick={() => navigate("/search")}
+            className="hover:text-gray-200"
+          >
+            Find Donors
+          </button>
+          <button
+            onClick={() => navigate("/contact")}
+            className="hover:text-gray-200"
+          >
+            Contact
+          </button>
         </div>
       </div>
     </nav>
