@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 function LandingPage() {
   const navigate = useNavigate();
 
-  const scrollToSection = (id) => {
+  const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
@@ -14,19 +14,6 @@ function LandingPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Navbar */}
-      <nav className="fixed top-0 left-0 w-full bg-red-500/60 backdrop-blur-md text-white shadow-md z-50">
-
-        <div className="container mx-auto flex justify-between items-center py-4 px-6">
-          <h1 className="text-2xl font-bold">BloodConnect</h1>
-          <div className="flex gap-6">
-            <button onClick={() => scrollToSection("hero")} className="hover:text-gray-200">Home</button>
-            <button onClick={() => scrollToSection("why-donate")} className="hover:text-gray-200">Why Donate</button>
-            <button onClick={() => scrollToSection("how-it-works")} className="hover:text-gray-200">How It Works</button>
-            <button onClick={() => scrollToSection("contact")} className="hover:text-gray-200">Contact</button>
-          </div>
-        </div>
-      </nav>
 
       {/* Hero Section */}
       <section
@@ -72,42 +59,45 @@ function LandingPage() {
 
       {/* Section 2 - Why Donate Blood */}
       <section
-        id="why-donate"
-        className="min-h-screen bg-white flex flex-col items-center justify-center px-6 py-16 text-center"
-      >
-        <h2 className="text-4xl font-bold text-red-600 mb-6">Why Donate Blood?</h2>
-        <p className="text-lg text-zinc-700 max-w-3xl mb-12">
-          Every 2 seconds, someone in the world needs blood. Donating blood can save up to
-          three lives in a single donation.
-        </p>
+  id="why-donate"
+  className="min-h-screen bg-white flex flex-col items-center justify-center px-6 py-16 text-center"
+>
+  <h2 className="text-4xl font-bold text-red-600 mb-6">Why Donate Blood?</h2>
+  <p className="text-lg text-zinc-700 max-w-3xl mb-12">
+    Every 2 seconds, someone in the world needs blood. Donating blood can save up to
+    three lives in a single donation.
+  </p>
 
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl">
-          <div className="bg-red-50 p-4 rounded-2xl shadow-lg">
-            <img
-              src="https://images.unsplash.com/photo-1584452964155-ef139340f0db?auto=format&fit=crop&w=800&q=80"
-              alt="Donor saving lives"
-              className="w-full h-60 object-cover rounded-xl mb-4"
-            />
-            <h3 className="text-xl font-semibold text-red-600">Save Lives</h3>
-          </div>
-          <div className="bg-red-50 p-4 rounded-2xl shadow-lg">
-            <img
-              src="https://t3.ftcdn.net/jpg/03/09/20/22/360_F_309202280_CgsWoCAdLBe9INBvdwBKUkpaLEP4XNLa.jpg"
-              alt="Donation process"
-              className="w-full h-60 object-cover rounded-xl mb-4"
-            />
-            <h3 className="text-xl font-semibold text-red-600">Easy & Safe</h3>
-          </div>
-          <div className="bg-red-50 p-4 rounded-2xl shadow-lg">
-            <img
-              src="https://www.shutterstock.com/image-vector/blood-donation-design-template-vector-600nw-452564095.jpg"
-              alt="Helping hand"
-              className="w-full h-60 object-cover rounded-xl mb-4"
-            />
-            <h3 className="text-xl font-semibold text-red-600">Be a Hero</h3>
-          </div>
-        </div>
-      </section>
+  <div className="grid md:grid-cols-3 gap-8 max-w-6xl">
+    {[
+      {
+        title: "Save Lives",
+        img: "https://images.unsplash.com/photo-1584452964155-ef139340f0db?auto=format&fit=crop&w=800&q=80",
+      },
+      {
+        title: "Easy & Safe",
+        img: "https://t3.ftcdn.net/jpg/03/09/20/22/360_F_309202280_CgsWoCAdLBe9INBvdwBKUkpaLEP4XNLa.jpg",
+      },
+      {
+        title: "Be a Hero",
+        img: "https://www.shutterstock.com/image-vector/blood-donation-design-template-vector-600nw-452564095.jpg",
+      },
+    ].map((card, i) => (
+      <div
+        key={i}
+        className="bg-red-50 p-4 rounded-2xl shadow-lg transform transition-all duration-500 hover:scale-105 hover:-translate-y-2 hover:shadow-2xl"
+      >
+        <img
+          src={card.img}
+          alt={card.title}
+          className="w-full h-60 object-cover rounded-xl mb-4 transition-transform duration-500 hover:scale-110"
+        />
+        <h3 className="text-xl font-semibold text-red-600">{card.title}</h3>
+      </div>
+    ))}
+  </div>
+</section>
+
 
       {/* Section 3 - How It Works */}
       <section
