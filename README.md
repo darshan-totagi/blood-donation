@@ -17,3 +17,14 @@ npm run dev
 Frontend runs on http://localhost:5173 by default and talks to backend at http://localhost:5000 (change in client/.env if needed).
 
 This zip contains ready-to-run project files. You still need Node.js and npm installed, and a MongoDB connection string (Atlas or local).
+
+
+## ✨ Contributors
+
+#### Thanks to all the wonderful contributors 💖
+
+<a href="https://github.com/darshan-totagi/blood-donation/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=darshan-totagi/blood-donation" />
+</a>
+
+#### See full list of contributor contribution [Contribution Graph](https://github.com/darshan-totagi/blood-donation/graphs/contributors)  
