@@ -81,9 +81,6 @@ This three-layered design ensures modularity, scalability, and clean data flow.
 
 #### **Folder Structure**
 
-```markdown
-## 🗂 Folder Structure
-
 ```text
 BloodConnect/
 ├── client/             # React frontend (Vite + Tailwind)
