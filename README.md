@@ -84,22 +84,36 @@ This three-layered design ensures modularity, scalability, and clean data flow.
 ## 🗂 Folder Structure
 
 ```text
-BloodConnect/
-├── client/             # React frontend (Vite + Tailwind)
-│   ├── public/         # Static assets and images
-│   ├── src/            # React components, pages, and styles
-│   └── ...
+BLOOD-DONATION/
 │
-├── server/             # Express backend
-│   ├── controllers/    # Logic for routes
-│   ├── models/         # MongoDB schemas
-│   ├── routes/         # API endpoints
-│   └── ...
+├── .github/                  # GitHub workflows, issue & PR templates
 │
-├── .env.example        # Sample environment variables
-├── README.md           # Project documentation
-├── LICENSE             # License information
-└── package.json
+├── client/                   # React frontend (Vite + Tailwind)
+│   ├── node_modules/         # Frontend dependencies
+│   ├── src/                  # React components, pages, and logic
+│   ├── .env                  # Frontend environment variables
+│   ├── index.html            # Entry HTML file for Vite
+│   ├── package.json          # Frontend dependencies and scripts
+│   ├── tailwind.config.cjs   # Tailwind configuration
+│   ├── postcss.config.cjs    # PostCSS configuration
+│   └── package-lock.json     # Locked dependency versions
+│
+├── server/                   # Node.js + Express backend
+│   ├── models/               # Mongoose database schemas
+│   ├── node_modules/         # Backend dependencies
+│   ├── .env                  # Backend environment variables
+│   ├── .env.example          # Example of required env variables
+│   ├── server.js             # Entry point for backend
+│   ├── seed.js               # Optional data seeding script
+│   ├── package.json          # Backend dependencies and scripts
+│   ├── package-lock.json     # Locked dependency versions
+│   └── README.md             # Backend-specific documentation
+│
+├── CODE_OF_CONDUCT.md        # Contributor code of conduct
+├── Contribution.md           # Contribution guidelines (WOC 2025)
+├── License.md                # License information (MIT)
+├── README.md                 # Main project documentation
+└── TODO.md                   # Task list or pending enhancements
 ```
 
 ## 🧰 Tech Stack
