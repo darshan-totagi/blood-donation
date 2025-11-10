@@ -78,7 +78,6 @@ Database (MongoDB via Mongoose)
 
 This three-layered design ensures modularity, scalability, and clean data flow.
 
----
 
 #### **Folder Structure**
 
@@ -102,8 +101,6 @@ BloodConnect/
 ├── README.md           # Project documentation
 ├── LICENSE             # License information
 └── package.json
-
----
 
 
 ## 🧰 Tech Stack
