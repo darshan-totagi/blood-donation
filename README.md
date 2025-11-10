@@ -6,6 +6,8 @@
 
 # 🩸 BloodConnect
 
+> Empowering lives through technology — connecting donors and recipients seamlessly.
+
 A full-stack Blood Donation and Request Management System built with the MERN stack (MongoDB, Express, React, Node).  
 This project is part of **Winter of Code Social 2025**, promoting open-source collaboration for social good.
 
@@ -79,7 +81,7 @@ Database (MongoDB via Mongoose)
 
 This three-layered design ensures modularity, scalability, and clean data flow.
 
-#### **Folder Structure**
+## 🗂 Folder Structure
 
 ```text
 BloodConnect/
@@ -127,7 +129,7 @@ BloodConnect/
 ```bash
 git clone https://github.com/darshan-totagi/blood-donation.git
 cd BloodConnect
-````
+```
 
 ---
 
@@ -226,7 +228,7 @@ For **Winter of Code Social**, please follow the project’s contribution guidel
 
 ---
 
-👥 Contributors
+## 👥 Contributors
 
 Thanks to all amazing contributors under Winter of Code Social 2025 💪
 
