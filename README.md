@@ -46,6 +46,16 @@ Initiated as part of **Winter of Code Social 2025**, this project demonstrates h
 
 ---
 
+## 💡 Motivation
+
+Every year, thousands of people struggle to find blood donors in emergencies.  
+**BloodConnect** aims to reduce this challenge by connecting donors and recipients faster — using technology to save lives.
+
+This aligns with **Winter of Code Social 2025’s** mission:  
+> “Building open-source projects for real social impact.”
+
+---
+
 ## 🔧 Core Features
 
 - 🩸 **Register as a donor** — share your blood group, contact, and city  
@@ -59,19 +69,23 @@ Initiated as part of **Winter of Code Social 2025**, this project demonstrates h
 
 ## 🧱 System Architecture
 
+```text
 Frontend (React + Vite)
-↓
+        ↓
 Backend (Node.js + Express)
-↓
+        ↓
 Database (MongoDB via Mongoose)
-
 
 This three-layered design ensures modularity, scalability, and clean data flow.
 
 ---
 
+#### **Folder Structure**
+
+```markdown
 ## 🗂 Folder Structure
 
+```text
 BloodConnect/
 ├── client/             # React frontend (Vite + Tailwind)
 │   ├── public/         # Static assets and images
@@ -89,17 +103,8 @@ BloodConnect/
 ├── LICENSE             # License information
 └── package.json
 
-
 ---
 
-## 💡 Motivation
-
-Every year, thousands of people struggle to find blood donors in emergencies.  
-**BloodConnect** aims to solve this by building a digital bridge between **donors and recipients**, reducing search time and increasing the reach of blood donation drives.  
-
-This project aligns with the **Winter of Code Social** mission — *using open source to create real social impact*.
-
----
 
 ## 🧰 Tech Stack
 
