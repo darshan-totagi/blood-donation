@@ -73,20 +73,20 @@ This three-layered design ensures modularity, scalability, and clean data flow.
 ## 🗂 Folder Structure
 
 BloodConnect/
-├── client/ # React frontend (Vite + Tailwind)
-│ ├── public/ # Static assets
-│ ├── src/ # React components, pages, hooks, etc.
-│ └── ...
+├── client/             # React frontend (Vite + Tailwind)
+│   ├── public/         # Static assets and images
+│   ├── src/            # React components, pages, and styles
+│   └── ...
 │
-├── server/ # Express backend
-│ ├── controllers/ # Business logic
-│ ├── models/ # MongoDB schemas
-│ ├── routes/ # API routes
-│ └── ...
+├── server/             # Express backend
+│   ├── controllers/    # Logic for routes
+│   ├── models/         # MongoDB schemas
+│   ├── routes/         # API endpoints
+│   └── ...
 │
-├── .env.example # Sample environment variables
-├── README.md # Documentation
-├── LICENSE # License information
+├── .env.example        # Sample environment variables
+├── README.md           # Project documentation
+├── LICENSE             # License information
 └── package.json
 
 
