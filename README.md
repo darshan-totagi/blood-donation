@@ -142,7 +142,7 @@ BLOOD-DONATION/
 
 ```bash
 git clone https://github.com/darshan-totagi/blood-donation.git
-cd BloodConnect
+cd Blood-donation
 ```
 
 ---
