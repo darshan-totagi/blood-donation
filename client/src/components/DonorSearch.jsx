@@ -40,6 +40,18 @@ function DonorSearch() {
       (filter.bloodGroup === "" || d.bloodGroup === filter.bloodGroup)
   );
 
+  const computeEligibility = (lastDonatedAt) => {
+    if (!lastDonatedAt) return { eligibleNow: true };
+    const last = new Date(lastDonatedAt);
+    if (isNaN(last.getTime())) return { eligibleNow: true };
+    const next = new Date(last);
+    next.setDate(next.getDate() + 90);
+    const now = new Date();
+    const daysRemaining = Math.ceil((next.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    return { eligibleNow: next <= now, nextEligibleDate: next, daysRemaining: Math.max(daysRemaining, 0) };
+  };
+  const selectedEligibility = selectedDonor ? computeEligibility(selectedDonor.lastDonatedAt) : null;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-rose-100 p-6 pt-24">
       <div className="max-w-6xl mx-auto space-y-8">
@@ -191,6 +203,33 @@ function DonorSearch() {
                     <div>
                       <p className="text-sm text-gray-500">City</p>
                       <p className="font-semibold text-lg text-gray-800">{selectedDonor.city}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 p-4 bg-purple-50 rounded-2xl">
+                    <FiDroplet className="w-6 h-6 text-purple-600" />
+                    <div>
+                      <p className="text-sm text-gray-500">Last Donated</p>
+                      <p className="font-semibold text-lg text-gray-800">{selectedDonor.lastDonatedAt ? new Date(selectedDonor.lastDonatedAt).toLocaleDateString() : "Unknown"}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 p-4 bg-amber-50 rounded-2xl">
+                    <FiClock className="w-6 h-6 text-amber-600" />
+                    <div>
+                      <p className="text-sm text-gray-500">Eligibility</p>
+                      {selectedEligibility ? (
+                        <div>
+                          <p className="font-semibold text-lg text-gray-800">
+                            {selectedEligibility.eligibleNow ? "Eligible now" : `Eligible in ${selectedEligibility.daysRemaining} days`}
+                          </p>
+                          {!selectedEligibility.eligibleNow && (
+                            <p className="text-xs text-gray-500">Next eligible: {selectedEligibility.nextEligibleDate.toLocaleDateString()}</p>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="font-semibold text-lg text-gray-800">Eligible now</p>
+                      )}
                     </div>
                   </div>
 

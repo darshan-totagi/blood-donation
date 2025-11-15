@@ -12,6 +12,7 @@ function DonorRegistration() {
     bloodGroup: "A+",
     notes: "",
     allowCall: false,
+    lastDonatedAt: "",
     availabilityType: "always",
     availabilitySlots: [],
   });
@@ -31,7 +32,7 @@ function DonorRegistration() {
       }
       await axios.post(API_URL, payload);
       alert("Registered successfully!");
-      setForm({ name: "", phone: "", city: "", bloodGroup: "A+", notes: "", allowCall: false, availabilityType: "always", availabilitySlots: [] });
+      setForm({ name: "", phone: "", city: "", bloodGroup: "A+", notes: "", allowCall: false, lastDonatedAt: "", availabilityType: "always", availabilitySlots: [] });
     } catch (err) {
       console.error("Failed to register donor:", err);
       alert("Failed to register donor");
@@ -99,6 +100,16 @@ function DonorRegistration() {
           value={form.notes}
           onChange={(e) => setForm({ ...form, notes: e.target.value })}
         />
+
+        <div className="space-y-2">
+          <label className="text-sm text-gray-700">Last donated date (optional)</label>
+          <input
+            type="date"
+            className="border rounded-xl px-4 py-2 w-full focus:ring-2 focus:ring-red-500 outline-none transition"
+            value={form.lastDonatedAt}
+            onChange={(e) => setForm({ ...form, lastDonatedAt: e.target.value })}
+          />
+        </div>
 
         <div className="space-y-3">
           <div className="flex gap-4">
