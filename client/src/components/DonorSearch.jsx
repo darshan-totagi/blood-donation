@@ -194,12 +194,19 @@ function DonorSearch() {
                     </div>
                   </div>
 
-                  {/* Availability */}
                   <div className="flex items-center gap-3 p-4 bg-yellow-50 rounded-2xl">
                     <FiClock className="w-6 h-6 text-yellow-600" />
-                    <div>
+                    <div className="flex-1">
                       <p className="text-sm text-gray-500">Availability</p>
-                      <p className="font-semibold text-lg text-gray-800">{selectedDonor.availability}</p>
+                      {selectedDonor.availabilitySlots && selectedDonor.availabilitySlots.length > 0 ? (
+                        <div className="space-y-1">
+                          {selectedDonor.availabilitySlots.map((s, i) => (
+                            <p key={i} className="text-gray-800">{s.day} {s.startTime} - {s.endTime}</p>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="font-semibold text-lg text-gray-800">{selectedDonor.availability}</p>
+                      )}
                     </div>
                   </div>
 

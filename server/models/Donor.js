@@ -7,6 +7,11 @@ const DonorSchema = new mongoose.Schema({
   city: { type: String, required: true },
   notes: { type: String },
   availability: { type: String, default: 'Available' },
+  availabilitySlots: [{
+    day: { type: String, enum: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], required: true },
+    startTime: { type: String, required: true },
+    endTime: { type: String, required: true }
+  }],
   allowCall: { type: Boolean, default: false }
 }, { timestamps: true });
 
