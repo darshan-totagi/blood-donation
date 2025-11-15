@@ -12,16 +12,26 @@ function DonorRegistration() {
     bloodGroup: "A+",
     notes: "",
     allowCall: false,
+    availabilityType: "always",
+    availabilitySlots: [],
   });
+  const [slot, setSlot] = useState({ day: "Mon", startTime: "09:00", endTime: "17:00" });
 
   const handleRegister = async (e) => {
     e.preventDefault();
     if (!form.name || !form.phone || !form.city) return;
 
     try {
-      await axios.post(API_URL, form);
+      const payload = { ...form };
+      if (form.availabilityType === "always") {
+        payload.availability = "Available";
+        payload.availabilitySlots = [];
+      } else {
+        payload.availability = "Scheduled";
+      }
+      await axios.post(API_URL, payload);
       alert("Registered successfully!");
-      setForm({ name: "", phone: "", city: "", bloodGroup: "A+", notes: "" });
+      setForm({ name: "", phone: "", city: "", bloodGroup: "A+", notes: "", allowCall: false, availabilityType: "always", availabilitySlots: [] });
     } catch (err) {
       console.error("Failed to register donor:", err);
       alert("Failed to register donor");
@@ -89,6 +99,83 @@ function DonorRegistration() {
           value={form.notes}
           onChange={(e) => setForm({ ...form, notes: e.target.value })}
         />
+
+        <div className="space-y-3">
+          <div className="flex gap-4">
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                name="availabilityType"
+                value="always"
+                checked={form.availabilityType === "always"}
+                onChange={(e) => setForm({ ...form, availabilityType: e.target.value })}
+              />
+              Always available
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                name="availabilityType"
+                value="custom"
+                checked={form.availabilityType === "custom"}
+                onChange={(e) => setForm({ ...form, availabilityType: e.target.value })}
+              />
+              Custom schedule
+            </label>
+          </div>
+
+          {form.availabilityType === "custom" && (
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <select
+                  className="border rounded-xl px-4 py-2"
+                  value={slot.day}
+                  onChange={(e) => setSlot({ ...slot, day: e.target.value })}
+                >
+                  {["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map((d) => (
+                    <option key={d}>{d}</option>
+                  ))}
+                </select>
+                <input
+                  type="time"
+                  className="border rounded-xl px-4 py-2"
+                  value={slot.startTime}
+                  onChange={(e) => setSlot({ ...slot, startTime: e.target.value })}
+                />
+                <input
+                  type="time"
+                  className="border rounded-xl px-4 py-2"
+                  value={slot.endTime}
+                  onChange={(e) => setSlot({ ...slot, endTime: e.target.value })}
+                />
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, availabilitySlots: [...form.availabilitySlots, slot] })}
+                  className="bg-red-600 text-white rounded-xl px-4"
+                >
+                  Add Slot
+                </button>
+              </div>
+
+              {form.availabilitySlots.length > 0 && (
+                <div className="space-y-1">
+                  {form.availabilitySlots.map((s, idx) => (
+                    <div key={idx} className="flex items-center justify-between border rounded-xl px-3 py-2">
+                      <span className="text-sm">{s.day} {s.startTime} - {s.endTime}</span>
+                      <button
+                        type="button"
+                        className="text-red-600"
+                        onClick={() => setForm({ ...form, availabilitySlots: form.availabilitySlots.filter((_, i) => i !== idx) })}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
 
         <div className="flex items-center gap-2">
           <input
