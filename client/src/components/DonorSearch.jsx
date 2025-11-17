@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import { FiPhone, FiX, FiMapPin, FiDroplet, FiUser, FiClock, FiEdit2 } from "react-icons/fi";
 
 const API_URL = "http://localhost:5000/api/donors";
@@ -13,6 +14,7 @@ function DonorSearch() {
   const [isEditingLastDonation, setIsEditingLastDonation] = useState(false);
   const [lastDonationInput, setLastDonationInput] = useState("");
   const [savingLastDonation, setSavingLastDonation] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchDonors = async () => {
@@ -175,10 +177,7 @@ function DonorSearch() {
                 <div>
                   <h3
                     className="font-semibold text-lg text-rose-700 cursor-pointer hover:text-rose-800 transition"
-                    onClick={() => {
-                      setSelectedDonor(d);
-                      setIsModalOpen(true);
-                    }}
+                    onClick={() => navigate(`/donor/${d._id}`)}
                   >
                     {d.name}
                   </h3>

@@ -35,9 +35,30 @@ app.get('/api/donors', async (req, res) => {
   }
 });
 
+app.get('/api/donors/:id', async (req, res) => {
+  try {
+    const donor = await Donor.findById(req.params.id);
+    if (!donor) return res.status(404).json({ error: 'not found' });
+    res.json(donor);
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ error: 'invalid id' });
+  }
+});
+
 app.post('/api/donors', async (req, res) => {
   try {
     const data = req.body;
+    data.name = String(data.name || '').trim();
+    data.city = String(data.city || '').trim();
+    data.phone = String(data.phone || '').replace(/\D/g, '');
+    if (!data.name || data.name.length < 2) return res.status(400).json({ error: 'invalid name' });
+    if (!data.city) return res.status(400).json({ error: 'invalid city' });
+    if (!data.phone || data.phone.length < 10 || data.phone.length > 15) return res.status(400).json({ error: 'invalid phone' });
+
+    const exists = await Donor.findOne({ phone: data.phone });
+    if (exists) return res.status(409).json({ error: 'duplicate phone' });
+
     const donor = new Donor(data);
     await donor.save();
     res.status(201).json(donor);
