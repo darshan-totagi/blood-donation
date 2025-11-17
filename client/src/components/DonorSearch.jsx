@@ -60,6 +60,27 @@ function DonorSearch() {
     return `${hour}:${m.toString().padStart(2, "0")} ${am ? "AM" : "PM"}`;
   };
 
+  const dayOrder = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+  const groupSlots = (slots) => {
+    if (!Array.isArray(slots) || slots.length === 0) return [];
+    const sorted = [...slots].sort((a, b) => dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day));
+    const groups = [];
+    for (const s of sorted) {
+      const idx = dayOrder.indexOf(s.day);
+      const last = groups[groups.length - 1];
+      if (last && last.endIdx + 1 === idx && last.startTime === s.startTime && last.endTime === s.endTime) {
+        last.endIdx = idx;
+      } else {
+        groups.push({ startIdx: idx, endIdx: idx, startTime: s.startTime, endTime: s.endTime });
+      }
+    }
+    return groups.map((g) => ({
+      label: g.startIdx === g.endIdx ? dayOrder[g.startIdx] : `${dayOrder[g.startIdx]}–${dayOrder[g.endIdx]}`,
+      startTime: g.startTime,
+      endTime: g.endTime,
+    }));
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-rose-100 p-6 pt-24">
       <div className="max-w-6xl mx-auto space-y-8">
@@ -139,20 +160,25 @@ function DonorSearch() {
                   >
                     {d.name}
                   </h3>
-                  <p className="text-sm text-zinc-500">
-                    {d.city} • <span className="font-medium">{d.bloodGroup}</span>
+                  <p className="text-sm text-zinc-500 flex items-center gap-2">
+                    <span>{d.city} • <span className="font-medium">{d.bloodGroup}</span></span>
+                    {(() => { const e = computeEligibility(d.lastDonatedAt); return (
+                      <span className={`ml-1 px-2 py-0.5 rounded-full border text-xs ${e.eligibleNow ? 'bg-green-100 text-green-700 border-green-200' : 'bg-amber-100 text-amber-700 border-amber-200'}`}>
+                        {e.eligibleNow ? 'Eligible now' : `In ${e.daysRemaining}d`}
+                      </span>
+                    ); })()}
                   </p>
                   {d.availabilitySlots && d.availabilitySlots.length > 0 ? (
                     <div className="mt-1 flex items-center gap-2">
                       <FiClock className="w-4 h-4 text-amber-600" />
                       <div className="flex flex-wrap gap-1">
-                        {d.availabilitySlots.slice(0, 3).map((s, idx) => (
+                        {groupSlots(d.availabilitySlots).slice(0, 3).map((g, idx) => (
                           <span key={idx} className="px-2 py-1 rounded-full bg-amber-100 border border-amber-200 text-amber-700">
-                            {s.day} {formatTime12(s.startTime)}–{formatTime12(s.endTime)}
+                            {g.label} {formatTime12(g.startTime)}–{formatTime12(g.endTime)}
                           </span>
                         ))}
-                        {d.availabilitySlots.length > 3 && (
-                          <span className="px-2 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-600">+{d.availabilitySlots.length - 3} more</span>
+                        {groupSlots(d.availabilitySlots).length > 3 && (
+                          <span className="px-2 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-600">+{groupSlots(d.availabilitySlots).length - 3} more</span>
                         )}
                       </div>
                     </div>
@@ -266,9 +292,11 @@ function DonorSearch() {
                     <div className="flex-1">
                       <p className="text-sm text-gray-500">Availability</p>
                       {selectedDonor.availabilitySlots && selectedDonor.availabilitySlots.length > 0 ? (
-                        <div className="space-y-1">
-                          {selectedDonor.availabilitySlots.map((s, i) => (
-                            <p key={i} className="text-gray-800">{s.day} {s.startTime} - {s.endTime}</p>
+                        <div className="flex flex-wrap gap-2 mt-1">
+                          {groupSlots(selectedDonor.availabilitySlots).map((g, i) => (
+                            <span key={i} className="px-3 py-1 rounded-full bg-amber-100 border border-amber-200 text-amber-800">
+                              {g.label} {formatTime12(g.startTime)}–{formatTime12(g.endTime)}
+                            </span>
                           ))}
                         </div>
                       ) : (
