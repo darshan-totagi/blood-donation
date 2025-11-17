@@ -40,6 +40,26 @@ function DonorSearch() {
       (filter.bloodGroup === "" || d.bloodGroup === filter.bloodGroup)
   );
 
+  const computeEligibility = (lastDonatedAt) => {
+    if (!lastDonatedAt) return { eligibleNow: true };
+    const last = new Date(lastDonatedAt);
+    if (isNaN(last.getTime())) return { eligibleNow: true };
+    const next = new Date(last);
+    next.setDate(next.getDate() + 90);
+    const now = new Date();
+    const daysRemaining = Math.ceil((next.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    return { eligibleNow: next <= now, nextEligibleDate: next, daysRemaining: Math.max(daysRemaining, 0) };
+  };
+  const selectedEligibility = selectedDonor ? computeEligibility(selectedDonor.lastDonatedAt) : null;
+
+  const formatTime12 = (t) => {
+    if (!t) return "";
+    const [h, m] = t.split(":").map(Number);
+    const am = h < 12;
+    const hour = ((h + 11) % 12) + 1;
+    return `${hour}:${m.toString().padStart(2, "0")} ${am ? "AM" : "PM"}`;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-rose-100 p-6 pt-24">
       <div className="max-w-6xl mx-auto space-y-8">
@@ -122,6 +142,26 @@ function DonorSearch() {
                   <p className="text-sm text-zinc-500">
                     {d.city} • <span className="font-medium">{d.bloodGroup}</span>
                   </p>
+                  {d.availabilitySlots && d.availabilitySlots.length > 0 ? (
+                    <div className="mt-1 flex items-center gap-2">
+                      <FiClock className="w-4 h-4 text-amber-600" />
+                      <div className="flex flex-wrap gap-1">
+                        {d.availabilitySlots.slice(0, 3).map((s, idx) => (
+                          <span key={idx} className="px-2 py-1 rounded-full bg-amber-100 border border-amber-200 text-amber-700">
+                            {s.day} {formatTime12(s.startTime)}–{formatTime12(s.endTime)}
+                          </span>
+                        ))}
+                        {d.availabilitySlots.length > 3 && (
+                          <span className="px-2 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-600">+{d.availabilitySlots.length - 3} more</span>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-1 flex items-center gap-2">
+                      <FiClock className="w-4 h-4 text-green-600" />
+                      <span className="px-2 py-1 rounded-full bg-green-100 border border-green-200 text-green-700">{d.availability || 'Available'}</span>
+                    </div>
+                  )}
                   {d.notes && <p className="text-xs text-zinc-400 mt-1">{d.notes}</p>}
                 </div>
 
@@ -191,6 +231,33 @@ function DonorSearch() {
                     <div>
                       <p className="text-sm text-gray-500">City</p>
                       <p className="font-semibold text-lg text-gray-800">{selectedDonor.city}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 p-4 bg-purple-50 rounded-2xl">
+                    <FiDroplet className="w-6 h-6 text-purple-600" />
+                    <div>
+                      <p className="text-sm text-gray-500">Last Donated</p>
+                      <p className="font-semibold text-lg text-gray-800">{selectedDonor.lastDonatedAt ? new Date(selectedDonor.lastDonatedAt).toLocaleDateString() : "Unknown"}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 p-4 bg-amber-50 rounded-2xl">
+                    <FiClock className="w-6 h-6 text-amber-600" />
+                    <div>
+                      <p className="text-sm text-gray-500">Eligibility</p>
+                      {selectedEligibility ? (
+                        <div>
+                          <p className="font-semibold text-lg text-gray-800">
+                            {selectedEligibility.eligibleNow ? "Eligible now" : `Eligible in ${selectedEligibility.daysRemaining} days`}
+                          </p>
+                          {!selectedEligibility.eligibleNow && (
+                            <p className="text-xs text-gray-500">Next eligible: {selectedEligibility.nextEligibleDate.toLocaleDateString()}</p>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="font-semibold text-lg text-gray-800">Eligible now</p>
+                      )}
                     </div>
                   </div>
 

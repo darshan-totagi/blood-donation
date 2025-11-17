@@ -12,6 +12,12 @@ const DonorSchema = new mongoose.Schema({
     startTime: { type: String, required: true },
     endTime: { type: String, required: true }
   }],
+  lastDonatedAt: { type: Date },
+  donationHistory: [{
+    date: { type: Date, required: true },
+    location: { type: String },
+    notes: { type: String }
+  }],
   allowCall: { type: Boolean, default: false }
 }, { timestamps: true });
 
