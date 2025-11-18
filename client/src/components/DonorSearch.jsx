@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { FiPhone, FiX, FiMapPin, FiDroplet, FiUser, FiClock, FiEdit2, FiCopy, FiTarget, FiCheck, FiAlertCircle } from "react-icons/fi";
 
 const API_URL = `${import.meta.env.VITE_API_URL}/api/donors`;
@@ -22,6 +22,16 @@ function DonorSearch() {
   const [copiedId, setCopiedId] = useState(null);
   const [copyToast, setCopyToast] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const bg = params.get("bloodGroup");
+    const city = params.get("city");
+    const sort = params.get("sort");
+    if (bg || city) setFilter({ city: city || "", bloodGroup: bg || "" });
+    if (sort) setSortByDistance(sort === "distance");
+  }, [location.search]);
 
   useEffect(() => {
     const fetchDonors = async () => {

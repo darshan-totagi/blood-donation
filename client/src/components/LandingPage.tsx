@@ -1,12 +1,14 @@
 // src/components/LandingPage.jsx
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 
 function LandingPage() {
   const navigate = useNavigate();
-
-
   const location = useLocation();
+  const [counts, setCounts] = useState({});
+  const bloodGroups = ["A+","A-","B+","B-","AB+","AB-","O+","O-"];
+  const API_URL = `${import.meta.env.VITE_API_URL}/api/donors`;
 
   useEffect(() => {
     if (location.hash) {
@@ -19,6 +21,18 @@ function LandingPage() {
       }
     }
   }, [location]);
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const res = await axios.get(API_URL);
+        const list = res.data || [];
+        const c = bloodGroups.reduce((acc,g)=>{acc[g]=list.filter(d=>d.bloodGroup===g).length; return acc;}, {});
+        setCounts(c);
+      } catch (e) {}
+    };
+    fetchCounts();
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -75,6 +89,32 @@ function LandingPage() {
           <div className="p-4 rounded-2xl bg-white shadow-sm text-center">
             <div className="text-2xl font-bold text-rose-700">24/7</div>
             <div className="text-xs text-zinc-500">Availability tracking</div>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-white py-16">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-3xl font-bold text-rose-700">Live Availability</h2>
+            <div className="flex gap-2">
+              {bloodGroups.map((g) => (
+                <button key={g} onClick={() => navigate(`/search?bloodGroup=${encodeURIComponent(g)}`)} className="px-3 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100">
+                  {g}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-3">
+            {bloodGroups.map((g) => (
+              <div key={g} className="flex items-center gap-3">
+                <span className="w-16 text-sm text-zinc-700">{g}</span>
+                <div className="flex-1 h-3 rounded-full bg-zinc-100 overflow-hidden">
+                  <div style={{ width: `${Math.min(100, (counts[g] || 0) * 5)}%` }} className="h-full bg-gradient-to-r from-rose-500 to-red-500"></div>
+                </div>
+                <span className="w-10 text-sm text-zinc-600">{counts[g] || 0}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
