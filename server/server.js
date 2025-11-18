@@ -79,6 +79,23 @@ app.put('/api/donors/:id', async (req, res) => {
   }
 });
 
+app.post('/api/donors/:id/donations', async (req, res) => {
+  try {
+    const { date, location, notes } = req.body;
+    const donor = await Donor.findById(req.params.id);
+    if (!donor) return res.status(404).json({ error: 'not found' });
+    const donationDate = date ? new Date(date) : new Date();
+    if (isNaN(donationDate.getTime())) return res.status(400).json({ error: 'invalid date' });
+    donor.donationHistory.push({ date: donationDate, location, notes });
+    donor.lastDonatedAt = donationDate;
+    await donor.save();
+    res.status(201).json(donor);
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ error: err.message });
+  }
+});
+
 app.delete('/api/donors/:id', async (req, res) => {
   try {
     const donor = await Donor.findByIdAndDelete(req.params.id);
