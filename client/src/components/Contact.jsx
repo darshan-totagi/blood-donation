@@ -5,12 +5,15 @@ export default function Contact() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    subject: "",
     message: "",
+    category: "General",
   });
 
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState("");
+  const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -19,10 +22,23 @@ export default function Contact() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    const errs = {};
+    if (!formData.name || formData.name.trim().length < 2) errs.name = "Please enter your full name";
+    const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRx.test(formData.email)) errs.email = "Enter a valid email";
+    if (!formData.subject || formData.subject.trim().length < 3) errs.subject = "Add a short subject";
+    if (!formData.message || formData.message.trim().length < 10) errs.message = "Message should be at least 10 characters";
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) {
+      setToast("Please fix the highlighted fields");
+      setTimeout(() => setToast(""), 2000);
+      setLoading(false);
+      return;
+    }
     try {
       setSubmitted(true);
       setToast("Message sent successfully");
-      setFormData({ name: "", email: "", message: "" });
+      setFormData({ name: "", email: "", subject: "", message: "", category: "General" });
       setTimeout(() => setToast(""), 1500);
     } catch (err) {
       setToast("Failed to send message");
@@ -43,17 +59,30 @@ export default function Contact() {
           <h2 className="text-3xl font-bold text-rose-700 mb-6 text-center">Contact Us</h2>
           {!submitted ? (
             <form onSubmit={handleSubmit} className="space-y-5 text-gray-700">
+              <div className="flex flex-wrap gap-2">
+                {['General','Support','Feedback','Partnership'].map((c) => (
+                  <button type="button" key={c} onClick={() => setFormData({ ...formData, category: c })} className={`px-3 py-1 rounded-full border text-sm ${formData.category===c? 'bg-rose-600 text-white border-rose-600':'bg-rose-50 text-rose-700 border-rose-200'}`}>{c}</button>
+                ))}
+              </div>
               <div className="relative">
                 <FiUser className="absolute left-3 top-3.5 w-5 h-5 text-zinc-400" />
-                <input type="text" name="name" value={formData.name} onChange={handleChange} required placeholder="Your full name" className="w-full pl-10 pr-4 py-3 border rounded-2xl focus:ring-2 focus:ring-rose-300 outline-none" />
+                <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="Your full name" className={`w-full pl-10 pr-4 py-3 border rounded-2xl focus:ring-2 focus:ring-rose-300 outline-none ${errors.name? 'border-rose-400':''}`} />
+                {errors.name && <div className="mt-1 text-xs text-rose-600">{errors.name}</div>}
               </div>
               <div className="relative">
                 <FiMail className="absolute left-3 top-3.5 w-5 h-5 text-zinc-400" />
-                <input type="email" name="email" value={formData.email} onChange={handleChange} required placeholder="you@example.com" className="w-full pl-10 pr-4 py-3 border rounded-2xl focus:ring-2 focus:ring-rose-300 outline-none" />
+                <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="you@example.com" className={`w-full pl-10 pr-4 py-3 border rounded-2xl focus:ring-2 focus:ring-rose-300 outline-none ${errors.email? 'border-rose-400':''}`} />
+                {errors.email && <div className="mt-1 text-xs text-rose-600">{errors.email}</div>}
               </div>
               <div className="relative">
                 <FiMessageCircle className="absolute left-3 top-3.5 w-5 h-5 text-zinc-400" />
-                <textarea name="message" value={formData.message} onChange={handleChange} required placeholder="Your message..." rows="4" className="w-full pl-10 pr-4 py-3 border rounded-2xl focus:ring-2 focus:ring-rose-300 outline-none resize-none"></textarea>
+                <input type="text" name="subject" value={formData.subject} onChange={handleChange} placeholder="Subject" className={`w-full pl-10 pr-4 py-3 border rounded-2xl focus:ring-2 focus:ring-rose-300 outline-none ${errors.subject? 'border-rose-400':''}`} />
+                {errors.subject && <div className="mt-1 text-xs text-rose-600">{errors.subject}</div>}
+              </div>
+              <div className="relative">
+                <FiMessageCircle className="absolute left-3 top-3.5 w-5 h-5 text-zinc-400" />
+                <textarea name="message" value={formData.message} onChange={handleChange} placeholder="Your message..." rows="4" className={`w-full pl-10 pr-4 py-3 border rounded-2xl focus:ring-2 focus:ring-rose-300 outline-none resize-none ${errors.message? 'border-rose-400':''}`}></textarea>
+                {errors.message && <div className="mt-1 text-xs text-rose-600">{errors.message}</div>}
               </div>
               {toast && <div className="px-4 py-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700">{toast}</div>}
               <button type="submit" disabled={loading} className={`w-full flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-red-600 text-white font-semibold shadow-lg transition ${loading ? 'opacity-60 cursor-not-allowed' : 'hover:bg-red-700 hover:scale-[1.01]'}`}>
