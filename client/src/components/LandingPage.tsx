@@ -35,32 +35,47 @@ function LandingPage() {
               "url('https://www.shutterstock.com/image-vector/world-donor-day-abstract-wallpaper-600nw-2115749144.jpg')",
           }}
         ></div>
-        <div className="absolute inset-0 bg-black bg-opacity-50"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/20"></div>
 
-        {/* Content */}
-        <div className="relative z-10 max-w-3xl text-white mt-16">
-          <h1 className="text-5xl font-bold mb-6">BloodConnect</h1>
-          <p className="text-lg mb-12">
-            Donate blood, save lives, and find donors near you quickly.
-          </p>
-
-          <div className="flex flex-col md:flex-row gap-6 justify-center">
+        <div className="relative z-10 max-w-4xl text-white mt-24 space-y-6">
+          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight">BloodConnect</h1>
+          <p className="text-lg md:text-xl text-white/90">Donate blood, save lives. Find donors near you instantly.</p>
+          <div className="flex flex-col md:flex-row gap-4 justify-center">
             <button
               onClick={() => navigate("/register")}
-              className="bg-red-600 text-white px-10 py-5 rounded-3xl shadow-lg hover:bg-red-700 transition text-lg font-semibold"
+              className="px-8 py-4 rounded-2xl bg-red-600 text-white shadow-lg hover:bg-red-700 font-semibold"
             >
               Register as Donor
             </button>
             <button
               onClick={() => navigate("/search")}
-              className="border-2 border-white text-white px-10 py-5 rounded-3xl shadow-lg hover:bg-red-500 transition text-lg font-semibold"
+              className="px-8 py-4 rounded-2xl bg-white/10 border border-white/40 text-white hover:bg-white/20 font-semibold"
             >
               Find Donors
             </button>
           </div>
-          <p className="mt-6 text-sm italic">
-            “Your one drop can be someone’s lifeline.”
-          </p>
+          <div className="text-sm italic text-white/80">“Your one drop can be someone’s lifeline.”</div>
+        </div>
+      </section>
+
+      <section className="bg-white/70 backdrop-blur-sm py-6">
+        <div className="max-w-5xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="p-4 rounded-2xl bg-white shadow-sm text-center">
+            <div className="text-2xl font-bold text-rose-700">90+</div>
+            <div className="text-xs text-zinc-500">Days between donations</div>
+          </div>
+          <div className="p-4 rounded-2xl bg-white shadow-sm text-center">
+            <div className="text-2xl font-bold text-rose-700">8</div>
+            <div className="text-xs text-zinc-500">Blood groups supported</div>
+          </div>
+          <div className="p-4 rounded-2xl bg-white shadow-sm text-center">
+            <div className="text-2xl font-bold text-rose-700">200</div>
+            <div className="text-xs text-zinc-500">Recent donors</div>
+          </div>
+          <div className="p-4 rounded-2xl bg-white shadow-sm text-center">
+            <div className="text-2xl font-bold text-rose-700">24/7</div>
+            <div className="text-xs text-zinc-500">Availability tracking</div>
+          </div>
         </div>
       </section>
 
@@ -150,62 +165,49 @@ function LandingPage() {
 
       {/* Footer */}
       {/* Footer */}
-      <footer id="contact" className="bg-red-600 text-white py-8 text-center">
-        <div className="container mx-auto px-6 grid md:grid-cols-2 gap-6 items-center">
+      <footer id="contact" className="bg-gradient-to-b from-red-700 to-red-600 text-white pt-12">
+        <div className="max-w-6xl mx-auto px-6 grid md:grid-cols-4 gap-8">
           <div>
-            <h3 className="font-semibold text-lg mb-2">Contact Us</h3>
+            <h3 className="text-xl font-bold mb-3">BloodConnect</h3>
+            <p className="text-sm text-white/80">Connecting donors and recipients with speed and trust.</p>
+          </div>
+          <div>
+            <h3 className="font-semibold text-lg mb-3">Quick Links</h3>
+            <div className="space-y-2 text-sm">
+              <a className="hover:text-gray-200" href="/">Home</a>
+              <a className="hover:text-gray-200" href="/register">Register</a>
+              <a className="hover:text-gray-200" href="/search">Find Donors</a>
+              <a className="hover:text-gray-200" href="/contact">Contact</a>
+            </div>
+          </div>
+          <div>
+            <h3 className="font-semibold text-lg mb-3">Contact</h3>
             <p>Email: support@bloodconnect.org</p>
             <p>Phone: +91 98765 43210</p>
             <p>Address: 123, Red Cross Street, Bengaluru</p>
           </div>
           <div>
-            <h3 className="font-semibold text-lg mb-2">Follow Us</h3>
-            <div className="flex justify-center gap-4 mt-2">
-              {/* Facebook */}
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <svg
-                  className="w-6 h-6 fill-current hover:text-gray-200"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M22 12C22 6.477 17.523 2 12 2S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.988H7.898v-2.89h2.54V9.845c0-2.507 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.462h-1.26c-1.243 0-1.63.772-1.63 1.562v1.875h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" />
-                </svg>
+            <h3 className="font-semibold text-lg mb-3">Newsletter</h3>
+            <div className="flex gap-2">
+              <input type="email" placeholder="Your email" className="flex-1 px-4 py-2 rounded-xl bg-white/10 border border-white/30 placeholder-white/70 focus:bg-white/20 focus:outline-none" />
+              <button className="px-4 py-2 rounded-xl bg-white text-red-700 font-semibold hover:bg-rose-100">Subscribe</button>
+            </div>
+            <div className="flex gap-4 mt-4">
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
+                <svg className="w-6 h-6 fill-current hover:opacity-80" viewBox="0 0 24 24"><path d="M22 12C22 6.477 17.523 2 12 2S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.988H7.898v-2.89h2.54V9.845c0-2.507 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.462h-1.26c-1.243 0-1.63.772-1.63 1.562v1.875h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" /></svg>
               </a>
-              {/* Twitter */}
-              <a
-                href="https://twitter.com"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <svg
-                  className="w-6 h-6 fill-current hover:text-gray-200"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M24 4.557a9.83 9.83 0 01-2.828.775 4.932 4.932 0 002.165-2.724 9.864 9.864 0 01-3.127 1.195 4.916 4.916 0 00-8.38 4.482A13.94 13.94 0 011.671 3.149 4.916 4.916 0 003.195 9.723a4.903 4.903 0 01-2.228-.616c-.054 2.281 1.581 4.415 3.949 4.89a4.936 4.936 0 01-2.224.084 4.923 4.923 0 004.598 3.417A9.867 9.867 0 010 19.54 13.924 13.924 0 007.548 21c9.142 0 14.307-7.721 13.995-14.646A9.935 9.935 0 0024 4.557z" />
-                </svg>
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer">
+                <svg className="w-6 h-6 fill-current hover:opacity-80" viewBox="0 0 24 24"><path d="M24 4.557a9.83 9.83 0 01-2.828.775 4.932 4.932 0 002.165-2.724 9.864 9.864 0 01-3.127 1.195 4.916 4.916 0 00-8.38 4.482A13.94 13.94 0 011.671 3.149 4.916 4.916 0 003.195 9.723a4.903 4.903 0 01-2.228-.616c-.054 2.281 1.581 4.415 3.949 4.89a4.936 4.936 0 01-2.224.084 4.923 4.923 0 004.598 3.417A9.867 9.867 0 010 19.54 13.924 13.924 0 007.548 21c9.142 0 14.307-7.721 13.995-14.646A9.935 9.935 0 0024 4.557z" /></svg>
               </a>
-              {/* Instagram */}
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <svg
-                  className="w-6 h-6 fill-current hover:text-gray-200"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.336 3.608 1.311.975.975 1.249 2.242 1.311 3.608.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.062 1.366-.336 2.633-1.311 3.608-.975.975-2.242 1.249-3.608 1.311-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.366-.062-2.633-.336-3.608-1.311-.975-.975-1.249-2.242-1.311-3.608C2.175 15.747 2.163 15.367 2.163 12s.012-3.584.07-4.85c.062-1.366.336-2.633 1.311-3.608.975-.975 2.242-1.249 3.608-1.311C8.416 2.175 8.796 2.163 12 2.163zm0-2.163C8.741 0 8.332.013 7.052.072 5.77.131 4.548.402 3.515 1.435 2.482 2.468 2.211 3.69 2.152 4.972.013 8.332 0 8.741 0 12s.013 3.668.072 4.948c.059 1.282.33 2.504 1.363 3.537s2.255 1.304 3.537 1.363C8.332 23.987 8.741 24 12 24s3.668-.013 4.948-.072c1.282-.059 2.504-.33 3.537-1.363s1.304-2.255 1.363-3.537C23.987 15.668 24 15.259 24 12s-.013-3.668-.072-4.948c-.059-1.282-.33-2.504-1.363-3.537S18.23.131 16.948.072C15.668.013 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zm0 10.162a3.999 3.999 0 110-7.998 3.999 3.999 0 010 7.998zm6.406-11.845a1.44 1.44 0 11-2.881 0 1.44 1.44 0 012.881 0z" />
-                </svg>
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
+                <svg className="w-6 h-6 fill-current hover:opacity-80" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.336 3.608 1.311.975.975 1.249 2.242 1.311 3.608.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.062 1.366-.336 2.633-1.311 3.608-.975.975-2.242 1.249-3.608 1.311-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.366-.062-2.633-.336-3.608-1.311-.975-.975-1.249-2.242-1.311-3.608C2.175 15.747 2.163 15.367 2.163 12s.012-3.584.07-4.85c.062-1.366.336-2.633 1.311-3.608.975-.975 2.242-1.249 3.608-1.311C8.416 2.175 8.796 2.163 12 2.163zm0-2.163C8.741 0 8.332.013 7.052.072 5.77.131 4.548.402 3.515 1.435 2.482 2.468 2.211 3.69 2.152 4.972.013 8.332 0 8.741 0 12s.013 3.668.072 4.948c.059 1.282.33 2.504 1.363 3.537s2.255 1.304 3.537 1.363C8.332 23.987 8.741 24 12 24s3.668-.013 4.948-.072c1.282-.059 2.504-.33 3.537-1.363s1.304-2.255 1.363-3.537C23.987 15.668 24 15.259 24 12s-.013-3.668-.072-4.948c-.059-1.282-.33-2.504-1.363-3.537S18.23.131 16.948.072C15.668.013 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zm0 10.162a3.999 3.999 0 110-7.998 3.999 3.999 0 010 7.998zm6.406-11.845a1.44 1.44 0 11-2.881 0 1.44 1.44 0 012.881 0z" /></svg>
               </a>
             </div>
           </div>
         </div>
-        <p className="text-sm mt-6">
-          © 2025 BloodConnect. All rights reserved.
-        </p>
+        <div className="mt-10 border-t border-white/20">
+          <p className="text-sm text-center py-6">© 2025 BloodConnect. All rights reserved.</p>
+        </div>
       </footer>
     </div>
   );
