@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { FiPhone, FiX, FiMapPin, FiDroplet, FiUser, FiClock, FiEdit2 } from "react-icons/fi";
+import { FiPhone, FiX, FiMapPin, FiDroplet, FiUser, FiClock, FiEdit2, FiCopy, FiTarget } from "react-icons/fi";
 
 const API_URL = `${import.meta.env.VITE_API_URL}/api/donors`;
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
@@ -16,6 +16,9 @@ function DonorSearch() {
   const [savingLastDonation, setSavingLastDonation] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [userLocation, setUserLocation] = useState(null);
+  const [locating, setLocating] = useState(false);
+  const [sortByDistance, setSortByDistance] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,14 +43,52 @@ function DonorSearch() {
     acc[g] = donors.filter((d) => d.bloodGroup === g).length;
     return acc;
   }, {});
+  const cityCounts = donors.reduce((acc, d) => {
+    if (d.city) acc[d.city] = (acc[d.city] || 0) + 1;
+    return acc;
+  }, {});
+  const topCities = Object.entries(cityCounts).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([name])=>name);
 
-  // Filtered donors
-  const filteredDonors = donors.filter(
+  // Distance helpers and filtered donors
+  const cityCoords = {
+    ahmedabad: { lat: 23.0225, lng: 72.5714 },
+    mumbai: { lat: 19.0760, lng: 72.8777 },
+    delhi: { lat: 28.6139, lng: 77.2090 },
+    bengaluru: { lat: 12.9716, lng: 77.5946 },
+    pune: { lat: 18.5204, lng: 73.8567 },
+    chennai: { lat: 13.0827, lng: 80.2707 },
+    kolkata: { lat: 22.5726, lng: 88.3639 }
+  };
+  const haversineKm = (a, b) => {
+    if (!a || !b) return null;
+    const toRad = (x) => (x * Math.PI) / 180;
+    const R = 6371;
+    const dLat = toRad(b.lat - a.lat);
+    const dLng = toRad(b.lng - a.lng);
+    const lat1 = toRad(a.lat);
+    const lat2 = toRad(b.lat);
+    const h = Math.sin(dLat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLng/2)**2;
+    return Math.round(R * 2 * Math.asin(Math.min(1, Math.sqrt(h))));
+  };
+  const cityToCoords = (city) => {
+    if (!city) return null;
+    const key = city.toLowerCase().trim();
+    return cityCoords[key] || null;
+  };
+  const enhanced = donors.map((d) => {
+    const dc = cityToCoords(d.city);
+    const distanceKm = userLocation && dc ? haversineKm(userLocation, dc) : null;
+    return { ...d, distanceKm };
+  });
+  const filteredDonors = enhanced.filter(
     (d) =>
       (filter.city === "" ||
         d.city?.toLowerCase().includes(filter.city.toLowerCase())) &&
       (filter.bloodGroup === "" || d.bloodGroup === filter.bloodGroup)
   );
+  const finalDonors = sortByDistance
+    ? [...filteredDonors].sort((a, b) => (a.distanceKm ?? 1e9) - (b.distanceKm ?? 1e9))
+    : filteredDonors;
 
   const computeEligibility = (lastDonatedAt) => {
     if (!lastDonatedAt) return { eligibleNow: true };
@@ -117,6 +158,18 @@ function DonorSearch() {
     }));
   };
 
+  const detectLocation = () => {
+    if (!navigator.geolocation) { setError("Geolocation not supported"); return; }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setLocating(false);
+      },
+      (err) => { setError(err.message || "Failed to get location"); setLocating(false); }
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-rose-100 p-6 pt-24">
       <div className="max-w-6xl mx-auto space-y-8">
@@ -168,6 +221,52 @@ function DonorSearch() {
             >
               Reset
             </button>
+            <div className="w-full flex flex-wrap gap-2">
+              {bloodGroups.map((g) => (
+                <button
+                  key={g}
+                  onClick={() => setFilter({ ...filter, bloodGroup: g })}
+                  className={`px-3 py-1 rounded-full border text-sm ${filter.bloodGroup===g? 'bg-rose-600 text-white border-rose-600':'bg-rose-50 text-rose-700 border-rose-200'}`}
+                >
+                  {g}
+                </button>
+              ))}
+              {topCities.map((c) => (
+                <button
+                  key={c}
+                  onClick={() => setFilter({ ...filter, city: c })}
+                  className={`px-3 py-1 rounded-full border text-sm ${filter.city.toLowerCase()===c.toLowerCase()? 'bg-emerald-600 text-white border-emerald-600':'bg-emerald-50 text-emerald-700 border-emerald-200'}`}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-3xl shadow-lg border border-rose-200 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-rose-700">Location & Distance</h2>
+            <button
+              onClick={detectLocation}
+              className="px-4 py-2 rounded-2xl border border-rose-300 text-rose-700 hover:bg-rose-50"
+            >
+              {locating ? 'Detecting…' : 'Use my location'}
+            </button>
+          </div>
+          {userLocation && (
+            <div className="rounded-2xl overflow-hidden border">
+              <iframe
+                title="Your location"
+                src={`https://maps.google.com/maps?q=${userLocation.lat},${userLocation.lng}&z=13&output=embed`}
+                className="w-full h-64"
+              />
+            </div>
+          )}
+          <div className="flex items-center gap-3">
+            <label className="text-sm text-gray-600">Sort by distance</label>
+            <input type="checkbox" checked={sortByDistance} onChange={(e)=>setSortByDistance(e.target.checked)} className="accent-rose-600" />
+            <span className="text-xs text-zinc-500">Distance shown when city coordinates available</span>
           </div>
         </div>
 
@@ -182,10 +281,10 @@ function DonorSearch() {
                 <div key={i} className="p-5 border rounded-2xl animate-pulse bg-zinc-50" />
               ))}
             </div>
-          ) : filteredDonors.length === 0 ? (
+          ) : finalDonors.length === 0 ? (
             <p className="text-zinc-500 text-sm">No donors found matching filters.</p>
           ) : (
-            filteredDonors.map((d, i) => (
+            finalDonors.map((d, i) => (
               <div
                 key={i}
                 className="p-5 border rounded-2xl shadow-sm hover:shadow-md transition flex items-center justify-between gap-4"
@@ -199,6 +298,9 @@ function DonorSearch() {
                   </h3>
                   <p className="text-sm text-zinc-500 flex items-center gap-2">
                     <span>{d.city} • <span className="font-medium">{d.bloodGroup}</span></span>
+                    {d.distanceKm!=null && (
+                      <span className="ml-1 px-2 py-0.5 rounded-full border text-xs bg-sky-100 text-sky-700 border-sky-200">{d.distanceKm} km</span>
+                    )}
                     {(() => { const e = computeEligibility(d.lastDonatedAt); return (
                       <span className={`ml-1 px-2 py-0.5 rounded-full border text-xs ${e.eligibleNow ? 'bg-green-100 text-green-700 border-green-200' : 'bg-amber-100 text-amber-700 border-amber-200'}`}>
                         {e.eligibleNow ? 'Eligible now' : `In ${e.daysRemaining}d`}
@@ -228,16 +330,24 @@ function DonorSearch() {
                   {d.notes && <p className="text-xs text-zinc-400 mt-1">{d.notes}</p>}
                 </div>
 
-                {/* Call button */}
-                {d.allowCall && (
-                  <a
-                    href={`tel:${d.phone}`}
-                    className="w-12 h-12 flex items-center justify-center rounded-full bg-red-500 text-white hover:bg-red-600 transition-transform transform hover:scale-110"
-                    title="Call Donor"
+                <div className="flex items-center gap-3">
+                  {d.allowCall && (
+                    <a
+                      href={`tel:${d.phone}`}
+                      className="w-12 h-12 flex items-center justify-center rounded-full bg-red-500 text-white hover:bg-red-600 transition-transform transform hover:scale-110"
+                      title="Call Donor"
+                    >
+                      <FiPhone className="w-6 h-6" />
+                    </a>
+                  )}
+                  <button
+                    onClick={() => navigator.clipboard && navigator.clipboard.writeText(String(d.phone))}
+                    className="w-12 h-12 flex items-center justify-center rounded-full border border-rose-300 text-rose-700 hover:bg-rose-50 transition"
+                    title="Copy Phone"
                   >
-                    <FiPhone className="w-6 h-6" />
-                  </a>
-                )}
+                    <FiCopy className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
             ))
           )}
