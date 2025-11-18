@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { FiPhone, FiX, FiMapPin, FiDroplet, FiUser, FiClock, FiEdit2, FiCopy, FiTarget } from "react-icons/fi";
+import { FiPhone, FiX, FiMapPin, FiDroplet, FiUser, FiClock, FiEdit2, FiCopy, FiTarget, FiCheck, FiAlertCircle } from "react-icons/fi";
 
 const API_URL = `${import.meta.env.VITE_API_URL}/api/donors`;
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
@@ -19,6 +19,8 @@ function DonorSearch() {
   const [userLocation, setUserLocation] = useState(null);
   const [locating, setLocating] = useState(false);
   const [sortByDistance, setSortByDistance] = useState(false);
+  const [copiedId, setCopiedId] = useState(null);
+  const [copyToast, setCopyToast] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -195,7 +197,7 @@ function DonorSearch() {
         </div>
 
         {/* Search & Filter */}
-        <div className="bg-white p-6 rounded-3xl shadow-lg border border-rose-200 space-y-4">
+        <div className="bg-white p-6 rounded-3xl shadow-lg border border-rose-200 space-y-4 sticky top-20 z-10 backdrop-blur-sm bg-white/90">
           <h2 className="text-2xl font-bold text-rose-700">Search Donors</h2>
           <div className="flex flex-wrap gap-3">
 
@@ -227,8 +229,8 @@ function DonorSearch() {
                   key={g}
                   onClick={() => setFilter({ ...filter, bloodGroup: g })}
                   className={`px-3 py-1 rounded-full border text-sm ${filter.bloodGroup===g? 'bg-rose-600 text-white border-rose-600':'bg-rose-50 text-rose-700 border-rose-200'}`}
-                >
-                  {g}
+>
+                  {g} ({counts[g] || 0})
                 </button>
               ))}
               {topCities.map((c) => (
@@ -236,8 +238,8 @@ function DonorSearch() {
                   key={c}
                   onClick={() => setFilter({ ...filter, city: c })}
                   className={`px-3 py-1 rounded-full border text-sm ${filter.city.toLowerCase()===c.toLowerCase()? 'bg-emerald-600 text-white border-emerald-600':'bg-emerald-50 text-emerald-700 border-emerald-200'}`}
-                >
-                  {c}
+>
+                  {c} ({cityCounts[c] || 0})
                 </button>
               ))}
             </div>
@@ -272,8 +274,11 @@ function DonorSearch() {
 
         {/* Donor List */}
         <div className="bg-white p-6 rounded-3xl shadow-lg border border-rose-200 space-y-4">
+          {copyToast && (
+            <div className="px-4 py-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center gap-2"><FiCheck className="w-4 h-4" /> {copyToast}</div>
+          )}
           {error && (
-            <div className="px-4 py-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700">{error}</div>
+            <div className="px-4 py-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 flex items-center gap-2"><FiAlertCircle className="w-4 h-4" /> {error}</div>
           )}
           {loading ? (
             <div className="space-y-3">
@@ -287,7 +292,7 @@ function DonorSearch() {
             finalDonors.map((d, i) => (
               <div
                 key={i}
-                className="p-5 border rounded-2xl shadow-sm hover:shadow-md transition flex items-center justify-between gap-4"
+                className="p-5 border rounded-3xl bg-gradient-to-br from-rose-50 via-white to-rose-50 shadow-sm hover:shadow-lg transition flex items-center justify-between gap-4"
               >
                 <div>
                   <h3
@@ -341,8 +346,8 @@ function DonorSearch() {
                     </a>
                   )}
                   <button
-                    onClick={() => navigator.clipboard && navigator.clipboard.writeText(String(d.phone))}
-                    className="w-12 h-12 flex items-center justify-center rounded-full border border-rose-300 text-rose-700 hover:bg-rose-50 transition"
+                    onClick={() => { if (navigator.clipboard) { navigator.clipboard.writeText(String(d.phone)); setCopiedId(d._id); setCopyToast('Phone copied'); setTimeout(()=>{ setCopyToast(''); setCopiedId(null); }, 1500); } }}
+                    className={`w-12 h-12 flex items-center justify-center rounded-full border transition ${copiedId===d._id ? 'border-emerald-300 text-emerald-700 bg-emerald-50' : 'border-rose-300 text-rose-700 hover:bg-rose-50'}`}
                     title="Copy Phone"
                   >
                     <FiCopy className="w-5 h-5" />
