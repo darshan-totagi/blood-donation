@@ -11,6 +11,7 @@ import {
   FaTimes,
   FaMoon,
   FaSun,
+  FaBell,
 } from "react-icons/fa";
 
 function Navbar() {
@@ -82,6 +83,13 @@ function Navbar() {
           </button>
 
           <button
+            onClick={() => navigate("/requests")}
+            className="flex items-center gap-2 hover:text-gray-200 transition"
+          >
+            <FaBell /> Requests
+          </button>
+
+          <button
             onClick={() => navigate("/contact")}
             className="flex items-center gap-2 hover:text-gray-200 transition"
           >
@@ -137,6 +145,12 @@ function Navbar() {
             className="flex items-center gap-3"
           >
             <FaSearch /> Find Donors
+          </button>
+          <button
+            onClick={() => navigate("/requests")}
+            className="flex items-center gap-3"
+          >
+            <FaBell /> Requests
           </button>
           <button
             onClick={() => navigate("/contact")}
