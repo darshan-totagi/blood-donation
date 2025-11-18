@@ -5,6 +5,7 @@ import LandingPage from "./LandingPage";
 import DonorRegistration from "./DonorRegistration";
 import DonorSearch from "./DonorSearch";
 import Contact from "./Contact";
+import DonorProfile from "./DonorProfile";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/register" element={<DonorRegistration />} />
         <Route path="/search" element={<DonorSearch />} />
+        <Route path="/donor/:id" element={<DonorProfile />} />
         <Route path="/contact" element={<Contact />} />
       </Routes>
     </Router>

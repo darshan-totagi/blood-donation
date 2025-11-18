@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const DonorSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  phone: { type: String, required: true },
+  phone: { type: String, required: true, unique: true },
   bloodGroup: { type: String, required: true },
   city: { type: String, required: true },
   notes: { type: String },
@@ -20,5 +20,7 @@ const DonorSchema = new mongoose.Schema({
   }],
   allowCall: { type: Boolean, default: false }
 }, { timestamps: true });
+
+DonorSchema.index({ phone: 1 }, { unique: true });
 
 module.exports = mongoose.model('Donor', DonorSchema);

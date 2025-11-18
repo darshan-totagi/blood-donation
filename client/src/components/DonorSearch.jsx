@@ -1,15 +1,20 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { FiPhone, FiX, FiMapPin, FiDroplet, FiUser, FiClock } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
+import { FiPhone, FiX, FiMapPin, FiDroplet, FiUser, FiClock, FiEdit2 } from "react-icons/fi";
 
 const API_URL = "http://localhost:5000/api/donors";
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
 function DonorSearch() {
   const [donors, setDonors] = useState([]);
-  const [filter, setFilter] = useState({ search: "", city: "", bloodGroup: "" });
+  const [filter, setFilter] = useState({ city: "", bloodGroup: "" });
   const [selectedDonor, setSelectedDonor] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditingLastDonation, setIsEditingLastDonation] = useState(false);
+  const [lastDonationInput, setLastDonationInput] = useState("");
+  const [savingLastDonation, setSavingLastDonation] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchDonors = async () => {
@@ -32,9 +37,6 @@ function DonorSearch() {
   // Filtered donors
   const filteredDonors = donors.filter(
     (d) =>
-      (filter.search === "" ||
-        d.name?.toLowerCase().includes(filter.search.toLowerCase()) ||
-        d.phone?.includes(filter.search)) &&
       (filter.city === "" ||
         d.city?.toLowerCase().includes(filter.city.toLowerCase())) &&
       (filter.bloodGroup === "" || d.bloodGroup === filter.bloodGroup)
@@ -58,6 +60,54 @@ function DonorSearch() {
     const am = h < 12;
     const hour = ((h + 11) % 12) + 1;
     return `${hour}:${m.toString().padStart(2, "0")} ${am ? "AM" : "PM"}`;
+  };
+
+  const toInputDate = (d) => {
+    if (!d) return "";
+    const dt = new Date(d);
+    if (isNaN(dt.getTime())) return "";
+    const y = dt.getFullYear();
+    const m = String(dt.getMonth() + 1).padStart(2, "0");
+    const day = String(dt.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
+
+  const handleSaveLastDonation = async () => {
+    if (!selectedDonor) return;
+    setSavingLastDonation(true);
+    try {
+      const payload = { lastDonatedAt: lastDonationInput ? new Date(lastDonationInput).toISOString() : null };
+      const res = await axios.put(`${API_URL}/${selectedDonor._id}`, payload);
+      setSelectedDonor(res.data);
+      setDonors((prev) => prev.map((d) => (d._id === res.data._id ? res.data : d)));
+      setIsEditingLastDonation(false);
+    } catch (err) {
+      console.error("Failed to update last donation date:", err);
+      alert("Failed to update last donation date");
+    } finally {
+      setSavingLastDonation(false);
+    }
+  };
+
+  const dayOrder = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+  const groupSlots = (slots) => {
+    if (!Array.isArray(slots) || slots.length === 0) return [];
+    const sorted = [...slots].sort((a, b) => dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day));
+    const groups = [];
+    for (const s of sorted) {
+      const idx = dayOrder.indexOf(s.day);
+      const last = groups[groups.length - 1];
+      if (last && last.endIdx + 1 === idx && last.startTime === s.startTime && last.endTime === s.endTime) {
+        last.endIdx = idx;
+      } else {
+        groups.push({ startIdx: idx, endIdx: idx, startTime: s.startTime, endTime: s.endTime });
+      }
+    }
+    return groups.map((g) => ({
+      label: g.startIdx === g.endIdx ? dayOrder[g.startIdx] : `${dayOrder[g.startIdx]}–${dayOrder[g.endIdx]}`,
+      startTime: g.startTime,
+      endTime: g.endTime,
+    }));
   };
 
   return (
@@ -88,12 +138,7 @@ function DonorSearch() {
         <div className="bg-white p-6 rounded-3xl shadow-lg border border-rose-200 space-y-4">
           <h2 className="text-2xl font-bold text-rose-700">Search Donors</h2>
           <div className="flex flex-wrap gap-3">
-            <input
-              placeholder="🔍 Search by name or phone"
-              className="border rounded-2xl px-5 py-3 flex-1 focus:ring-2 focus:ring-rose-300 outline-none transition"
-              value={filter.search}
-              onChange={(e) => setFilter({ ...filter, search: e.target.value })}
-            />
+
             <input
               placeholder="🏙️ City"
               className="border rounded-2xl px-5 py-3 w-44 focus:ring-2 focus:ring-rose-300 outline-none transition"
@@ -111,7 +156,7 @@ function DonorSearch() {
               ))}
             </select>
             <button
-              onClick={() => setFilter({ search: "", city: "", bloodGroup: "" })}
+              onClick={() => setFilter({ city: "", bloodGroup: "" })}
               className="px-5 py-3 border border-red-400 text-red-600 rounded-2xl hover:bg-red-50 transition"
             >
               Reset
@@ -132,27 +177,29 @@ function DonorSearch() {
                 <div>
                   <h3
                     className="font-semibold text-lg text-rose-700 cursor-pointer hover:text-rose-800 transition"
-                    onClick={() => {
-                      setSelectedDonor(d);
-                      setIsModalOpen(true);
-                    }}
+                    onClick={() => navigate(`/donor/${d._id}`)}
                   >
                     {d.name}
                   </h3>
-                  <p className="text-sm text-zinc-500">
-                    {d.city} • <span className="font-medium">{d.bloodGroup}</span>
+                  <p className="text-sm text-zinc-500 flex items-center gap-2">
+                    <span>{d.city} • <span className="font-medium">{d.bloodGroup}</span></span>
+                    {(() => { const e = computeEligibility(d.lastDonatedAt); return (
+                      <span className={`ml-1 px-2 py-0.5 rounded-full border text-xs ${e.eligibleNow ? 'bg-green-100 text-green-700 border-green-200' : 'bg-amber-100 text-amber-700 border-amber-200'}`}>
+                        {e.eligibleNow ? 'Eligible now' : `In ${e.daysRemaining}d`}
+                      </span>
+                    ); })()}
                   </p>
                   {d.availabilitySlots && d.availabilitySlots.length > 0 ? (
                     <div className="mt-1 flex items-center gap-2">
                       <FiClock className="w-4 h-4 text-amber-600" />
                       <div className="flex flex-wrap gap-1">
-                        {d.availabilitySlots.slice(0, 3).map((s, idx) => (
+                        {groupSlots(d.availabilitySlots).slice(0, 3).map((g, idx) => (
                           <span key={idx} className="px-2 py-1 rounded-full bg-amber-100 border border-amber-200 text-amber-700">
-                            {s.day} {formatTime12(s.startTime)}–{formatTime12(s.endTime)}
+                            {g.label} {formatTime12(g.startTime)}–{formatTime12(g.endTime)}
                           </span>
                         ))}
-                        {d.availabilitySlots.length > 3 && (
-                          <span className="px-2 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-600">+{d.availabilitySlots.length - 3} more</span>
+                        {groupSlots(d.availabilitySlots).length > 3 && (
+                          <span className="px-2 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-600">+{groupSlots(d.availabilitySlots).length - 3} more</span>
                         )}
                       </div>
                     </div>
@@ -236,9 +283,44 @@ function DonorSearch() {
 
                   <div className="flex items-center gap-3 p-4 bg-purple-50 rounded-2xl">
                     <FiDroplet className="w-6 h-6 text-purple-600" />
-                    <div>
-                      <p className="text-sm text-gray-500">Last Donated</p>
-                      <p className="font-semibold text-lg text-gray-800">{selectedDonor.lastDonatedAt ? new Date(selectedDonor.lastDonatedAt).toLocaleDateString() : "Unknown"}</p>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-gray-500">Last Donated</p>
+                          <p className="font-semibold text-lg text-gray-800">{selectedDonor.lastDonatedAt ? new Date(selectedDonor.lastDonatedAt).toLocaleDateString() : "Unknown"}</p>
+                        </div>
+                        {!isEditingLastDonation && (
+                          <button
+                            onClick={() => { setIsEditingLastDonation(true); setLastDonationInput(toInputDate(selectedDonor.lastDonatedAt)); }}
+                            className="px-3 py-2 rounded-2xl bg-gray-100 hover:bg-gray-200 text-sm flex items-center gap-2"
+                          >
+                            <FiEdit2 className="w-4 h-4" /> Edit
+                          </button>
+                        )}
+                      </div>
+                      {isEditingLastDonation && (
+                        <div className="mt-3 flex items-center gap-2">
+                          <input
+                            type="date"
+                            value={lastDonationInput}
+                            onChange={(e) => setLastDonationInput(e.target.value)}
+                            className="border rounded-xl px-3 py-2"
+                          />
+                          <button
+                            onClick={handleSaveLastDonation}
+                            disabled={savingLastDonation}
+                            className="px-3 py-2 rounded-2xl bg-red-500 text-white hover:bg-red-600"
+                          >
+                            {savingLastDonation ? 'Saving…' : 'Save'}
+                          </button>
+                          <button
+                            onClick={() => setIsEditingLastDonation(false)}
+                            className="px-3 py-2 rounded-2xl bg-gray-200 text-gray-700 hover:bg-gray-300"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -266,9 +348,11 @@ function DonorSearch() {
                     <div className="flex-1">
                       <p className="text-sm text-gray-500">Availability</p>
                       {selectedDonor.availabilitySlots && selectedDonor.availabilitySlots.length > 0 ? (
-                        <div className="space-y-1">
-                          {selectedDonor.availabilitySlots.map((s, i) => (
-                            <p key={i} className="text-gray-800">{s.day} {s.startTime} - {s.endTime}</p>
+                        <div className="flex flex-wrap gap-2 mt-1">
+                          {groupSlots(selectedDonor.availabilitySlots).map((g, i) => (
+                            <span key={i} className="px-3 py-1 rounded-full bg-amber-100 border border-amber-200 text-amber-800">
+                              {g.label} {formatTime12(g.startTime)}–{formatTime12(g.endTime)}
+                            </span>
                           ))}
                         </div>
                       ) : (

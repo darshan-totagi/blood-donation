@@ -35,9 +35,30 @@ app.get('/api/donors', async (req, res) => {
   }
 });
 
+app.get('/api/donors/:id', async (req, res) => {
+  try {
+    const donor = await Donor.findById(req.params.id);
+    if (!donor) return res.status(404).json({ error: 'not found' });
+    res.json(donor);
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ error: 'invalid id' });
+  }
+});
+
 app.post('/api/donors', async (req, res) => {
   try {
     const data = req.body;
+    data.name = String(data.name || '').trim();
+    data.city = String(data.city || '').trim();
+    data.phone = String(data.phone || '').replace(/\D/g, '');
+    if (!data.name || data.name.length < 2) return res.status(400).json({ error: 'invalid name' });
+    if (!data.city) return res.status(400).json({ error: 'invalid city' });
+    if (!data.phone || data.phone.length < 10 || data.phone.length > 15) return res.status(400).json({ error: 'invalid phone' });
+
+    const exists = await Donor.findOne({ phone: data.phone });
+    if (exists) return res.status(409).json({ error: 'duplicate phone' });
+
     const donor = new Donor(data);
     await donor.save();
     res.status(201).json(donor);
@@ -52,6 +73,23 @@ app.put('/api/donors/:id', async (req, res) => {
     const donor = await Donor.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!donor) return res.status(404).json({ error: 'not found' });
     res.json(donor);
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.post('/api/donors/:id/donations', async (req, res) => {
+  try {
+    const { date, location, notes } = req.body;
+    const donor = await Donor.findById(req.params.id);
+    if (!donor) return res.status(404).json({ error: 'not found' });
+    const donationDate = date ? new Date(date) : new Date();
+    if (isNaN(donationDate.getTime())) return res.status(400).json({ error: 'invalid date' });
+    donor.donationHistory.push({ date: donationDate, location, notes });
+    donor.lastDonatedAt = donationDate;
+    await donor.save();
+    res.status(201).json(donor);
   } catch (err) {
     console.error(err);
     res.status(400).json({ error: err.message });

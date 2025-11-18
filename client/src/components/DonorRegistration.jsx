@@ -21,9 +21,14 @@ function DonorRegistration() {
   const handleRegister = async (e) => {
     e.preventDefault();
     if (!form.name || !form.phone || !form.city) return;
+    const phoneDigits = String(form.phone).replace(/\D/g, "");
+    if (phoneDigits.length < 10 || phoneDigits.length > 15) {
+      alert("Please enter a valid phone number");
+      return;
+    }
 
     try {
-      const payload = { ...form };
+      const payload = { ...form, phone: phoneDigits };
       if (form.availabilityType === "always") {
         payload.availability = "Available";
         payload.availabilitySlots = [];
@@ -35,7 +40,7 @@ function DonorRegistration() {
       setForm({ name: "", phone: "", city: "", bloodGroup: "A+", notes: "", allowCall: false, lastDonatedAt: "", availabilityType: "always", availabilitySlots: [] });
     } catch (err) {
       console.error("Failed to register donor:", err);
-      alert("Failed to register donor");
+      alert(err?.response?.data?.error || "Failed to register donor");
     }
   };
 
