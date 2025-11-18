@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { FiPhone, FiX, FiMapPin, FiDroplet, FiUser, FiClock, FiEdit2 } from "react-icons/fi";
 
-const API_URL = "http://localhost:5000/api/donors";
+const API_URL = `${import.meta.env.VITE_API_URL}/api/donors`;
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
 function DonorSearch() {

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/donors";
+const API_URL = `${import.meta.env.VITE_API_URL}/api/donors`;
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
 function DonorRegistration() {
@@ -40,7 +40,7 @@ function DonorRegistration() {
       setForm({ name: "", phone: "", city: "", bloodGroup: "A+", notes: "", allowCall: false, lastDonatedAt: "", availabilityType: "always", availabilitySlots: [] });
     } catch (err) {
       console.error("Failed to register donor:", err);
-      alert(err?.response?.data?.error || "Failed to register donor");
+      alert(err?.response?.data?.error || err.message || "Failed to register donor");
     }
   };
 
