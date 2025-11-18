@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/donors";
+const API_URL = `${import.meta.env.VITE_API_URL}/api/donors`;
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
 function DonorRegistration() {
@@ -17,6 +17,9 @@ function DonorRegistration() {
     availabilitySlots: [],
   });
   const [slot, setSlot] = useState({ day: "Mon", startTime: "09:00", endTime: "17:00" });
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("success");
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -27,6 +30,7 @@ function DonorRegistration() {
       return;
     }
 
+    setSubmitting(true);
     try {
       const payload = { ...form, phone: phoneDigits };
       if (form.availabilityType === "always") {
@@ -36,11 +40,15 @@ function DonorRegistration() {
         payload.availability = "Scheduled";
       }
       await axios.post(API_URL, payload);
-      alert("Registered successfully!");
+      setMessage("Registered successfully!");
+      setMessageType("success");
       setForm({ name: "", phone: "", city: "", bloodGroup: "A+", notes: "", allowCall: false, lastDonatedAt: "", availabilityType: "always", availabilitySlots: [] });
     } catch (err) {
       console.error("Failed to register donor:", err);
-      alert(err?.response?.data?.error || "Failed to register donor");
+      setMessage(err?.response?.data?.error || err.message || "Failed to register donor");
+      setMessageType("error");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -67,6 +75,11 @@ function DonorRegistration() {
         <h2 className="text-2xl font-bold text-red-600 text-center mb-4">
           Register as a Donor
         </h2>
+        {message && (
+          <div className={`mb-4 px-4 py-3 rounded-2xl border ${messageType === 'success' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-rose-50 border-rose-200 text-rose-700'}`}>
+            {message}
+          </div>
+        )}
 
         <input
           placeholder="Full name"
@@ -209,9 +222,10 @@ function DonorRegistration() {
 
         <button
           type="submit"
-          className="bg-red-600 text-white rounded-xl px-4 py-3 font-semibold w-full hover:bg-red-700 transition-transform transform hover:scale-105"
+          disabled={submitting}
+          className={`bg-red-600 text-white rounded-xl px-4 py-3 font-semibold w-full transition-transform transform ${submitting ? 'opacity-60 cursor-not-allowed' : 'hover:bg-red-700 hover:scale-105'}`}
         >
-          Register
+          {submitting ? 'Submitting…' : 'Register'}
         </button>
       </form>
     </div>

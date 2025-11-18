@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { FiPhone, FiX, FiMapPin, FiDroplet, FiUser, FiClock, FiEdit2 } from "react-icons/fi";
 
-const API_URL = "http://localhost:5000/api/donors";
+const API_URL = `${import.meta.env.VITE_API_URL}/api/donors`;
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
 function DonorSearch() {
@@ -14,15 +14,22 @@ function DonorSearch() {
   const [isEditingLastDonation, setIsEditingLastDonation] = useState(false);
   const [lastDonationInput, setLastDonationInput] = useState("");
   const [savingLastDonation, setSavingLastDonation] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchDonors = async () => {
+      setLoading(true);
+      setError("");
       try {
         const res = await axios.get(API_URL);
         setDonors(res.data);
       } catch (err) {
         console.error("Failed to fetch donors:", err);
+        setError(err?.response?.data?.error || err.message || "Failed to fetch donors");
+      } finally {
+        setLoading(false);
       }
     };
     fetchDonors();
@@ -166,7 +173,16 @@ function DonorSearch() {
 
         {/* Donor List */}
         <div className="bg-white p-6 rounded-3xl shadow-lg border border-rose-200 space-y-4">
-          {filteredDonors.length === 0 ? (
+          {error && (
+            <div className="px-4 py-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700">{error}</div>
+          )}
+          {loading ? (
+            <div className="space-y-3">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="p-5 border rounded-2xl animate-pulse bg-zinc-50" />
+              ))}
+            </div>
+          ) : filteredDonors.length === 0 ? (
             <p className="text-zinc-500 text-sm">No donors found matching filters.</p>
           ) : (
             filteredDonors.map((d, i) => (

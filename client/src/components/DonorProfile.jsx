@@ -4,7 +4,7 @@ import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { FiUser, FiPhone, FiDroplet, FiMapPin, FiClock, FiChevronLeft } from "react-icons/fi";
 
-const API_URL = "http://localhost:5000/api/donors";
+const API_URL = `${import.meta.env.VITE_API_URL}/api/donors`;
 
 function DonorProfile() {
   const { id } = useParams();

@@ -1,5 +1,5 @@
 // src/components/LandingPage.jsx
-import React, { use, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 function LandingPage() {
