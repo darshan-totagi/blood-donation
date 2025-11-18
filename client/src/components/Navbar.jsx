@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FaHome,
@@ -9,11 +9,19 @@ import {
   FaPhoneAlt,
   FaBars,
   FaTimes,
+  FaMoon,
+  FaSun,
 } from "react-icons/fa";
 
 function Navbar() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'dark') root.classList.add('dark'); else root.classList.remove('dark');
+    localStorage.setItem('theme', theme);
+  }, [theme]);
 
   const handleScrollNav = (hash) => {
     navigate("/");
@@ -26,7 +34,7 @@ function Navbar() {
   };
 
   return (
-    <nav className="fixed top-0 w-full bg-red-600/70 backdrop-blur-lg shadow-md z-50">
+    <nav className="fixed top-0 w-full bg-red-600/70 dark:bg-zinc-900/70 backdrop-blur-lg shadow-md z-50">
       <div className="container mx-auto flex justify-between items-center py-3 px-6">
         <h1
           onClick={() => navigate("/")}
@@ -78,6 +86,13 @@ function Navbar() {
             className="flex items-center gap-2 hover:text-gray-200 transition"
           >
             <FaPhoneAlt /> Contact
+          </button>
+          <button
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            className="flex items-center gap-2 px-3 py-1 rounded-2xl border border-white/30 hover:bg-white/10 transition"
+            title="Toggle theme"
+          >
+            {theme === 'dark' ? <FaSun /> : <FaMoon />} {theme === 'dark' ? 'Light' : 'Dark'}
           </button>
         </div>
 

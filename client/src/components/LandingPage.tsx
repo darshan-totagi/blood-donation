@@ -167,7 +167,7 @@ function LandingPage() {
       {/* Section 3 - How It Works */}
       <section
         id="how-it-works"
-        className="min-h-screen bg-red-50 flex flex-col items-center justify-center px-6 py-16 text-center"
+        className="min-h-screen bg-red-50 flex flex-col items-center justify-center px-6 py-16 text-center dark:bg-zinc-900 dark:text-white"
       >
         <h2 className="text-4xl font-bold text-red-600 mb-6">How It Works</h2>
         <div className="grid md:grid-cols-3 gap-10 max-w-5xl">
@@ -199,6 +199,27 @@ function LandingPage() {
               and make an impact. Your timely help can give someone a second
               chance at life
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="bg-white dark:bg-zinc-900 py-16">
+        <div className="max-w-6xl mx-auto px-6">
+          <h2 className="text-3xl font-bold text-rose-700 dark:text-rose-400 mb-8">What Donors Say</h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[{
+              quote: 'Donating blood makes me feel connected to my community.', name: 'Asha'
+            },{
+              quote: 'The platform is simple and quick. Found donors in minutes.', name: 'Rohit'
+            },{
+              quote: 'Scheduling availability helped me donate regularly.', name: 'Sana'
+            }].map((t,i)=> (
+              <div key={i} className="p-6 rounded-3xl bg-rose-50 border border-rose-200 shadow-sm hover:shadow-lg transition dark:bg-zinc-800 dark:border-zinc-700">
+                <p className="text-zinc-700 dark:text-zinc-200">“{t.quote}”</p>
+                <div className="mt-3 text-sm text-zinc-500 dark:text-zinc-400">— {t.name}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
