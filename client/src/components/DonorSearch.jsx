@@ -28,7 +28,7 @@ function DonorSearch() {
   const [exportTitle, setExportTitle] = useState("Donor Roster");
   const [exportFrom, setExportFrom] = useState("");
   const [exportTo, setExportTo] = useState("");
-  const [exportPageSize, setExportPageSize] = useState(20);
+ 
   const navigate = useNavigate();
   const location = useLocation();
 
