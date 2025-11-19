@@ -10,15 +10,7 @@ export default function Contact() {
     category: "General",
   });
 
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [toast, setToast] = useState("");
-  const [errors, setErrors] = useState({});
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
+ 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
