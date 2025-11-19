@@ -302,7 +302,7 @@ function DonorSearch() {
             finalDonors.map((d, i) => (
               <div
                 key={i}
-                className="p-5 border rounded-3xl bg-gradient-to-br from-rose-50 via-white to-rose-50 shadow-sm hover:shadow-lg transition flex items-center justify-between gap-4"
+                className="p-5 border rounded-3xl border-l-4 border-rose-300 bg-gradient-to-br from-rose-50 via-white to-rose-50 shadow-sm hover:shadow-lg transition flex items-center justify-between gap-4"
               >
                 <div>
                   <h3
