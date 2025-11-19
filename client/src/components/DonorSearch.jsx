@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FiPhone, FiX, FiMapPin, FiDroplet, FiUser, FiClock, FiEdit2, FiCopy, FiTarget, FiCheck, FiAlertCircle, FiMessageCircle, FiDownload, FiSend } from "react-icons/fi";
+import { FiPhone, FiX, FiMapPin, FiDroplet, FiUser, FiClock, FiEdit2, FiCopy, FiTarget, FiCheck, FiAlertCircle, FiMessageCircle, FiDownload, FiSend, FiPrinter } from "react-icons/fi";
 
 const API_URL = `${import.meta.env.VITE_API_URL}/api/donors`;
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
@@ -229,6 +229,22 @@ function DonorSearch() {
     setTimeout(()=>setCopyToast(''), 1500);
   };
 
+  const buildPrintableRoster = (items) => {
+    const style = `body{font-family:system-ui,-apple-system,Segoe UI,Roboto; padding:24px;} h1{margin:0 0 16px;} table{width:100%; border-collapse:collapse;} th,td{border:1px solid #ddd; padding:8px; font-size:13px;} th{background:#f9fafb; text-align:left;} tr:nth-child(even){background:#fafafa}`;
+    const rows = items.map((d) => `<tr><td>${d.name||''}</td><td>${d.phone||''}</td><td>${d.bloodGroup||''}</td><td>${d.city||''}</td><td>${d.distanceKm!=null?d.distanceKm:''}</td></tr>`).join('');
+    return `<!doctype html><html><head><meta charset='utf-8'><title>Donor Roster</title><style>${style}</style></head><body><h1>Donor Roster</h1><table><thead><tr><th>Name</th><th>Phone</th><th>Blood Group</th><th>City</th><th>Distance (km)</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
+  };
+  const handleExportSelectedPDF = () => {
+    const items = selectedDonors.length ? selectedDonors : finalDonors;
+    const html = buildPrintableRoster(items);
+    const w = window.open('', '_blank');
+    if (!w) return;
+    w.document.write(html);
+    w.document.close();
+    w.focus();
+    setTimeout(() => w.print(), 300);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-rose-100 p-6 pt-24">
       <div className="max-w-6xl mx-auto space-y-8">
@@ -350,6 +366,7 @@ function DonorSearch() {
                 <button onClick={sendWhatsAppToSelected} className="px-3 py-2 rounded-2xl bg-green-500 text-white hover:bg-green-600 text-sm flex items-center gap-2"><FiSend className="w-4 h-4" /> Send WhatsApp</button>
                 <button onClick={handleCopySelectedPhones} className="px-3 py-2 rounded-2xl border border-emerald-300 text-emerald-700 hover:bg-emerald-50 text-sm">Copy Phones</button>
                 <button onClick={handleExportSelectedCSV} className="px-3 py-2 rounded-2xl border border-zinc-300 text-zinc-700 hover:bg-zinc-50 text-sm flex items-center gap-2"><FiDownload className="w-4 h-4" /> Export CSV</button>
+                <button onClick={handleExportSelectedPDF} className="px-3 py-2 rounded-2xl border border-zinc-300 text-zinc-700 hover:bg-zinc-50 text-sm flex items-center gap-2"><FiPrinter className="w-4 h-4" /> Export PDF</button>
               </div>
             )}
           </div>
