@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FiPhone, FiX, FiMapPin, FiDroplet, FiUser, FiClock, FiEdit2, FiCopy, FiTarget, FiCheck, FiAlertCircle } from "react-icons/fi";
+import { FiPhone, FiX, FiMapPin, FiDroplet, FiUser, FiClock, FiEdit2, FiCopy, FiTarget, FiCheck, FiAlertCircle, FiDownload } from "react-icons/fi";
 
 const API_URL = `${import.meta.env.VITE_API_URL}/api/donors`;
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
@@ -21,6 +21,8 @@ function DonorSearch() {
   const [sortByDistance, setSortByDistance] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
   const [copyToast, setCopyToast] = useState("");
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState(() => new Set());
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -182,6 +184,33 @@ function DonorSearch() {
     );
   };
 
+  const selectedDonors = enhanced.filter((d) => selectedIds.has(d._id));
+  const toggleSelect = (id) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+  const handleCopySelectedPhones = () => {
+    const phones = selectedDonors.map((d) => d.phone).join(', ');
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(phones);
+      setCopyToast(`Copied ${selectedDonors.length} phone(s)`);
+      setTimeout(()=>setCopyToast(''), 1500);
+    }
+  };
+  const handleExportSelectedCSV = () => {
+    const header = 'Name,Phone,BloodGroup,City,DistanceKm';
+    const rows = selectedDonors.map((d) => [d.name, d.phone, d.bloodGroup, d.city || '', d.distanceKm ?? ''].join(','));
+    const csv = [header, ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'donors.csv'; a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-rose-100 p-6 pt-24">
       <div className="max-w-6xl mx-auto space-y-8">
@@ -284,6 +313,21 @@ function DonorSearch() {
 
         {/* Donor List */}
         <div className="bg-white p-6 rounded-3xl shadow-lg border border-rose-200 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <label className="text-sm text-zinc-600">Select</label>
+              <input type="checkbox" checked={selectionMode} onChange={(e)=>{ setSelectionMode(e.target.checked); if(!e.target.checked) setSelectedIds(new Set()); }} className="accent-rose-600" />
+              {selectionMode && selectedIds.size > 0 && (
+                <span className="text-sm text-zinc-700">{selectedIds.size} selected</span>
+              )}
+            </div>
+            {selectionMode && selectedIds.size > 0 && (
+              <div className="flex items-center gap-2">
+                <button onClick={handleCopySelectedPhones} className="px-3 py-2 rounded-2xl border border-emerald-300 text-emerald-700 hover:bg-emerald-50 text-sm">Copy Phones</button>
+                <button onClick={handleExportSelectedCSV} className="px-3 py-2 rounded-2xl border border-zinc-300 text-zinc-700 hover:bg-zinc-50 text-sm flex items-center gap-2"><FiDownload className="w-4 h-4" /> Export CSV</button>
+              </div>
+            )}
+          </div>
           {copyToast && (
             <div className="px-4 py-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center gap-2"><FiCheck className="w-4 h-4" /> {copyToast}</div>
           )}
@@ -346,6 +390,9 @@ function DonorSearch() {
                 </div>
 
                 <div className="flex items-center gap-3">
+                  {selectionMode && (
+                    <input type="checkbox" checked={selectedIds.has(d._id)} onChange={()=>toggleSelect(d._id)} className="accent-rose-600" />
+                  )}
                   {d.allowCall && (
                     <a
                       href={`tel:${d.phone}`}
