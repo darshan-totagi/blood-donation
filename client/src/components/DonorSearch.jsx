@@ -24,6 +24,11 @@ function DonorSearch() {
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState(() => new Set());
   const [waTemplate, setWaTemplate] = useState("Hi {name}, we urgently need {bloodGroup} in {city}. Are you available to donate?");
+  const [radiusKm, setRadiusKm] = useState(25);
+  const [exportTitle, setExportTitle] = useState("Donor Roster");
+  const [exportFrom, setExportFrom] = useState("");
+  const [exportTo, setExportTo] = useState("");
+  const [exportPageSize, setExportPageSize] = useState(20);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -229,14 +234,31 @@ function DonorSearch() {
     setTimeout(()=>setCopyToast(''), 1500);
   };
 
-  const buildPrintableRoster = (items) => {
-    const style = `body{font-family:system-ui,-apple-system,Segoe UI,Roboto; padding:24px;} h1{margin:0 0 16px;} table{width:100%; border-collapse:collapse;} th,td{border:1px solid #ddd; padding:8px; font-size:13px;} th{background:#f9fafb; text-align:left;} tr:nth-child(even){background:#fafafa}`;
-    const rows = items.map((d) => `<tr><td>${d.name||''}</td><td>${d.phone||''}</td><td>${d.bloodGroup||''}</td><td>${d.city||''}</td><td>${d.distanceKm!=null?d.distanceKm:''}</td></tr>`).join('');
-    return `<!doctype html><html><head><meta charset='utf-8'><title>Donor Roster</title><style>${style}</style></head><body><h1>Donor Roster</h1><table><thead><tr><th>Name</th><th>Phone</th><th>Blood Group</th><th>City</th><th>Distance (km)</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
+  const buildPrintableRoster = (items, opts) => {
+    const { title, from, to, pageSize } = opts;
+    const printDate = new Date().toLocaleString();
+    const style = `@page{margin:20mm} body{font-family:system-ui,-apple-system,Segoe UI,Roboto; padding:0; margin:0;} .page{padding:16px 24px; page-break-after:always;} .header{display:flex; align-items:center; gap:12px; margin-bottom:12px;} .logo{width:28px; height:28px} h1{font-size:18px; margin:0} .meta{font-size:12px; color:#6b7280} table{width:100%; border-collapse:collapse} th,td{border:1px solid #e5e7eb; padding:6px 8px; font-size:12px} th{background:#f9fafb; text-align:left} tr:nth-child(even){background:#fafafa} .footer{margin-top:8px; font-size:12px; color:#6b7280; display:flex; justify-content:space-between}`;
+    const pages = [];
+    for (let i=0;i<items.length;i+=pageSize) pages.push(items.slice(i,i+pageSize));
+    const svg = `<svg class='logo' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path fill='#ef4444' d='M12 2c3 4 8 8 8 13a8 8 0 1 1-16 0c0-5 5-9 8-13z'/></svg>`;
+    const dateRange = (from||to) ? `Date range: ${from||'—'} to ${to||'—'}` : '';
+    const htmlPages = pages.map((page, idx) => {
+      const rows = page.map((d) => `<tr><td>${d.name||''}</td><td>${d.phone||''}</td><td>${d.bloodGroup||''}</td><td>${d.city||''}</td><td>${d.distanceKm!=null?d.distanceKm:''}</td></tr>`).join('');
+      return `<div class='page'><div class='header'>${svg}<div><h1>${title||'Donor Roster'}</h1><div class='meta'>${dateRange}</div></div></div><table><thead><tr><th>Name</th><th>Phone</th><th>Blood Group</th><th>City</th><th>Distance (km)</th></tr></thead><tbody>${rows}</tbody></table><div class='footer'><span>Printed: ${printDate}</span><span>Page ${idx+1} of ${pages.length}</span></div></div>`;
+    }).join('');
+    return `<!doctype html><html><head><meta charset='utf-8'><title>${title||'Donor Roster'}</title><style>${style}</style></head><body>${htmlPages}</body></html>`;
   };
   const handleExportSelectedPDF = () => {
-    const items = selectedDonors.length ? selectedDonors : finalDonors;
-    const html = buildPrintableRoster(items);
+    const base = selectedDonors.length ? selectedDonors : finalDonors;
+    const filtered = base.filter((d) => {
+      if (!exportFrom && !exportTo) return true;
+      const dt = d.lastDonatedAt ? new Date(d.lastDonatedAt) : null;
+      if (!dt || isNaN(dt.getTime())) return false;
+      const fromOk = exportFrom ? new Date(exportFrom) <= dt : true;
+      const toOk = exportTo ? dt <= new Date(exportTo) : true;
+      return fromOk && toOk;
+    });
+    const html = buildPrintableRoster(filtered, { title: exportTitle, from: exportFrom, to: exportTo, pageSize: exportPageSize || 20 });
     const w = window.open('', '_blank');
     if (!w) return;
     w.document.write(html);
@@ -363,6 +385,19 @@ function DonorSearch() {
                   placeholder="WhatsApp template. Use {name} {bloodGroup} {city}"
                   className="px-3 py-2 rounded-2xl border border-zinc-300 text-sm w-64"
                 />
+                <input
+                  value={exportTitle}
+                  onChange={(e)=>setExportTitle(e.target.value)}
+                  placeholder="PDF title"
+                  className="px-3 py-2 rounded-2xl border border-zinc-300 text-sm w-40"
+                />
+                <input type="date" value={exportFrom} onChange={(e)=>setExportFrom(e.target.value)} className="px-3 py-2 rounded-2xl border border-zinc-300 text-sm" />
+                <input type="date" value={exportTo} onChange={(e)=>setExportTo(e.target.value)} className="px-3 py-2 rounded-2xl border border-zinc-300 text-sm" />
+                <select value={exportPageSize} onChange={(e)=>setExportPageSize(Number(e.target.value))} className="px-3 py-2 rounded-2xl border border-zinc-300 text-sm">
+                  <option value={10}>10/pg</option>
+                  <option value={20}>20/pg</option>
+                  <option value={30}>30/pg</option>
+                </select>
                 <button onClick={sendWhatsAppToSelected} className="px-3 py-2 rounded-2xl bg-green-500 text-white hover:bg-green-600 text-sm flex items-center gap-2"><FiSend className="w-4 h-4" /> Send WhatsApp</button>
                 <button onClick={handleCopySelectedPhones} className="px-3 py-2 rounded-2xl border border-emerald-300 text-emerald-700 hover:bg-emerald-50 text-sm">Copy Phones</button>
                 <button onClick={handleExportSelectedCSV} className="px-3 py-2 rounded-2xl border border-zinc-300 text-zinc-700 hover:bg-zinc-50 text-sm flex items-center gap-2"><FiDownload className="w-4 h-4" /> Export CSV</button>
