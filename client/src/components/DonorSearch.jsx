@@ -362,6 +362,20 @@ function DonorSearch() {
                   >
                     <FiCopy className="w-5 h-5" />
                   </button>
+                  <button
+                    onClick={() => { const url = `${window.location.origin}/donor/${d._id}`; if (navigator.clipboard) { navigator.clipboard.writeText(url); setCopyToast('Link copied'); setTimeout(()=> setCopyToast(''), 1500); } }}
+                    className="w-12 h-12 flex items-center justify-center rounded-full border border-zinc-300 text-zinc-700 hover:bg-zinc-50 transition"
+                    title="Copy Profile Link"
+                  >
+                    <FiShare2 className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => toggleFavorite(d._id)}
+                    className={`w-12 h-12 flex items-center justify-center rounded-full border transition ${favorites.has(d._id) ? 'bg-yellow-100 text-yellow-700 border-yellow-300' : 'border-rose-300 text-rose-700 hover:bg-rose-50'}`}
+                    title="Favorite"
+                  >
+                    <FiStar className="w-5 h-5" />
+                  </button>
                 </div>
               </div>
             ))
