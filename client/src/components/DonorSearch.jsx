@@ -99,7 +99,8 @@ function DonorSearch() {
     (d) =>
       (filter.city === "" ||
         d.city?.toLowerCase().includes(filter.city.toLowerCase())) &&
-      (filter.bloodGroup === "" || d.bloodGroup === filter.bloodGroup)
+      (filter.bloodGroup === "" || d.bloodGroup === filter.bloodGroup) &&
+      (!userLocation || !radiusKm || (d.distanceKm != null && d.distanceKm <= radiusKm))
   );
   const finalDonors = sortByDistance
     ? [...filteredDonors].sort((a, b) => (a.distanceKm ?? 1e9) - (b.distanceKm ?? 1e9))
