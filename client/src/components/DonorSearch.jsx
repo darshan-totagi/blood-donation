@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FiPhone, FiX, FiMapPin, FiDroplet, FiUser, FiClock, FiEdit2, FiCopy, FiTarget, FiCheck, FiAlertCircle, FiDownload } from "react-icons/fi";
+import { FiPhone, FiX, FiMapPin, FiDroplet, FiUser, FiClock, FiEdit2, FiCopy, FiTarget, FiCheck, FiAlertCircle, FiMessageCircle, FiDownload, FiSend } from "react-icons/fi";
 
 const API_URL = `${import.meta.env.VITE_API_URL}/api/donors`;
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
@@ -23,6 +23,7 @@ function DonorSearch() {
   const [copyToast, setCopyToast] = useState("");
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState(() => new Set());
+  const [waTemplate, setWaTemplate] = useState("Hi {name}, we urgently need {bloodGroup} in {city}. Are you available to donate?");
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -192,6 +193,10 @@ function DonorSearch() {
       return next;
     });
   };
+  const renderTemplateForDonor = (d) => waTemplate
+    .replace('{name}', d.name || '')
+    .replace('{bloodGroup}', d.bloodGroup || '')
+    .replace('{city}', d.city || '');
   const handleCopySelectedPhones = () => {
     const phones = selectedDonors.map((d) => d.phone).join(', ');
     if (navigator.clipboard) {
@@ -209,6 +214,18 @@ function DonorSearch() {
     const a = document.createElement('a');
     a.href = url; a.download = 'donors.csv'; a.click();
     URL.revokeObjectURL(url);
+  };
+  const sendWhatsAppToSelected = () => {
+    let i = 0;
+    for (const d of selectedDonors) {
+      const phone = String(d.phone).replace(/\D/g, '');
+      const text = encodeURIComponent(renderTemplateForDonor(d));
+      const url = `https://wa.me/${phone}?text=${text}`;
+      setTimeout(() => window.open(url, '_blank'), i * 400);
+      i++;
+    }
+    setCopyToast(`Opened WhatsApp for ${selectedDonors.length} donor(s)`);
+    setTimeout(()=>setCopyToast(''), 1500);
   };
 
   return (
@@ -322,7 +339,14 @@ function DonorSearch() {
               )}
             </div>
             {selectionMode && selectedIds.size > 0 && (
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <input
+                  value={waTemplate}
+                  onChange={(e)=>setWaTemplate(e.target.value)}
+                  placeholder="WhatsApp template. Use {name} {bloodGroup} {city}"
+                  className="px-3 py-2 rounded-2xl border border-zinc-300 text-sm w-64"
+                />
+                <button onClick={sendWhatsAppToSelected} className="px-3 py-2 rounded-2xl bg-green-500 text-white hover:bg-green-600 text-sm flex items-center gap-2"><FiSend className="w-4 h-4" /> Send WhatsApp</button>
                 <button onClick={handleCopySelectedPhones} className="px-3 py-2 rounded-2xl border border-emerald-300 text-emerald-700 hover:bg-emerald-50 text-sm">Copy Phones</button>
                 <button onClick={handleExportSelectedCSV} className="px-3 py-2 rounded-2xl border border-zinc-300 text-zinc-700 hover:bg-zinc-50 text-sm flex items-center gap-2"><FiDownload className="w-4 h-4" /> Export CSV</button>
               </div>
