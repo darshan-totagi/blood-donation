@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { FiMail, FiUser, FiMessageCircle, FiSend, FiPhone, FiMapPin } from "react-icons/fi";
+import React, { useState, useEffect } from "react";
+import { FiMail, FiUser, FiMessageCircle, FiSend, FiPhone, FiMapPin, FiRotateCcw } from "react-icons/fi";
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -17,6 +17,28 @@ export default function Contact() {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  useEffect(() => {
+    const draft = localStorage.getItem("contactDraft");
+    if (draft) {
+      try {
+        const parsed = JSON.parse(draft);
+        setFormData((prev) => ({ ...prev, ...parsed }));
+        setToast("Draft restored");
+        setTimeout(() => setToast(""), 1500);
+      } catch {}
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("contactDraft", JSON.stringify(formData));
+  }, [formData]);
+
+  const clearDraft = () => {
+    localStorage.removeItem("contactDraft");
+    setToast("Draft cleared");
+    setTimeout(() => setToast(""), 1000);
   };
 
   const handleSubmit = async (e) => {
@@ -38,6 +60,7 @@ export default function Contact() {
     try {
       setSubmitted(true);
       setToast("Message sent successfully");
+      localStorage.removeItem("contactDraft");
       setFormData({ name: "", email: "", subject: "", message: "", category: "General" });
       setTimeout(() => setToast(""), 1500);
     } catch (err) {
@@ -63,6 +86,13 @@ export default function Contact() {
                 {['General','Support','Feedback','Partnership'].map((c) => (
                   <button type="button" key={c} onClick={() => setFormData({ ...formData, category: c })} className={`px-3 py-1 rounded-full border text-sm ${formData.category===c? 'bg-rose-600 text-white border-rose-600':'bg-rose-50 text-rose-700 border-rose-200'}`}>{c}</button>
                 ))}
+              </div>
+              <div className="flex items-center justify-between text-xs text-zinc-500">
+                <span>Autosaves locally</span>
+                <button type="button" onClick={clearDraft} className="text-rose-600 hover:underline flex items-center gap-1">
+                  <FiRotateCcw className="w-4 h-4" />
+                  Clear draft
+                </button>
               </div>
               <div className="relative">
                 <FiUser className="absolute left-3 top-3.5 w-5 h-5 text-zinc-400" />
