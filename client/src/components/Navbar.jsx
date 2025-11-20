@@ -51,6 +51,10 @@ function Navbar() {
     return () => { cancelled = true; clearInterval(id); };
   }, []);
 
+  const bloodGroups = ["A+","A-","B+","B-","AB+","AB-","O+","O-"];
+  const [quickCity, setQuickCity] = useState("");
+  const [quickBG, setQuickBG] = useState("");
+
   const handleScrollNav = (hash) => {
     navigate("/");
     setTimeout(() => {
@@ -108,6 +112,28 @@ function Navbar() {
           >
             <FaSearch /> Find Donors
           </button>
+          <div className="flex items-center gap-2 ml-2">
+            <input
+              type="text"
+              placeholder="City"
+              value={quickCity}
+              onChange={(e)=>setQuickCity(e.target.value)}
+              className="px-2 py-1 rounded-lg border border-white/30 bg-white/20 text-white placeholder:text-white/70 dark:bg-zinc-800 dark:text-zinc-100 dark:border-zinc-700"
+              style={{width:'150px'}}
+            />
+            <select
+              value={quickBG}
+              onChange={(e)=>setQuickBG(e.target.value)}
+              className="px-2 py-1 rounded-lg border border-white/30 bg-white/20 text-white dark:bg-zinc-800 dark:text-zinc-100 dark:border-zinc-700"
+            >
+              <option value="">Any BG</option>
+              {bloodGroups.map(g=> (<option key={g} value={g}>{g}</option>))}
+            </select>
+            <button
+              onClick={()=>{ const qs = new URLSearchParams(); if (quickCity) qs.set('city', quickCity); if (quickBG) qs.set('bloodGroup', quickBG); navigate(`/search?${qs.toString()}`); }}
+              className="px-3 py-1 rounded-xl bg-white/90 text-red-700 dark:bg-zinc-800 dark:text-rose-300 border border-white/30 dark:border-zinc-700 hover:brightness-110 transition"
+            >Go</button>
+          </div>
 
           <button
             onClick={() => navigate("/requests")}
@@ -182,6 +208,14 @@ function Navbar() {
           >
             <FaSearch /> Find Donors
           </button>
+          <div className="space-y-2">
+            <input type="text" placeholder="City" value={quickCity} onChange={(e)=>setQuickCity(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-white/30 bg-white/80 text-red-700 placeholder:text-red-700/70" />
+            <select value={quickBG} onChange={(e)=>setQuickBG(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-white/30 bg-white/80 text-red-700">
+              <option value="">Any BG</option>
+              {bloodGroups.map(g=> (<option key={g} value={g}>{g}</option>))}
+            </select>
+            <button onClick={()=>{ const qs = new URLSearchParams(); if (quickCity) qs.set('city', quickCity); if (quickBG) qs.set('bloodGroup', quickBG); navigate(`/search?${qs.toString()}`); setMenuOpen(false); }} className="w-full px-3 py-2 rounded-xl bg-white/90 text-red-700 border border-white/30 hover:brightness-110 transition">Go</button>
+          </div>
           <button
             onClick={() => navigate("/requests")}
             className="flex items-center gap-3"
