@@ -103,13 +103,13 @@ export default function Contact() {
             <form onSubmit={handleSubmit} className="space-y-5 text-gray-700 dark:text-zinc-200">
               <div className="flex flex-wrap gap-2">
                 {['General','Support','Feedback','Partnership'].map((c) => (
-                  <button type="button" key={c} onClick={() => setFormData({ ...formData, category: c })} className={`px-3 py-1 rounded-full border text-sm ${formData.category===c? 'bg-rose-600 text-white border-rose-600 dark:bg-rose-600 dark:border-rose-600':'bg-rose-50 text-rose-700 border-rose-200 dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700'}`}>{c}</button>
+                  <button type="button" key={c} onClick={() => setFormData({ ...formData, category: c })} className={`px-3 py-1 rounded-full border text-sm transition duration-200 ease-out hover:scale-105 ${formData.category===c? 'bg-rose-600 text-white border-rose-600 dark:bg-rose-600 dark:border-rose-600 shadow-md':'bg-rose-50 text-rose-700 border-rose-200 dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700 hover:shadow'}`}>{c}</button>
                 ))}
               </div>
               <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
                 <span>Autosaves locally</span>
-                <button type="button" onClick={clearDraft} className="text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1">
-                  <FiRotateCcw className="w-4 h-4" />
+                <button type="button" onClick={clearDraft} className="text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1 group">
+                  <FiRotateCcw className="w-4 h-4 transition-transform duration-300 group-hover:rotate-180" />
                   Clear draft
                 </button>
               </div>
@@ -134,8 +134,8 @@ export default function Contact() {
                 {errors.message && <div className="mt-1 text-xs text-rose-600 dark:text-rose-300">{errors.message}</div>}
               </div>
               {toast && <div className="px-4 py-3 rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-700 text-emerald-700 dark:text-emerald-200">{toast}</div>}
-              <button type="submit" disabled={loading} className={`w-full flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-red-600 dark:bg-red-700 text-white font-semibold shadow-lg transition ${loading ? 'opacity-60 cursor-not-allowed' : 'hover:bg-red-700 dark:hover:bg-red-600 hover:scale-[1.01]'}`}>
-                <FiSend className="w-5 h-5" /> {loading ? 'Sending…' : 'Send Message'}
+              <button type="submit" disabled={loading} className={`group w-full flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-rose-600 to-red-600 dark:from-rose-700 dark:to-red-700 text-white font-semibold shadow-lg transition-all duration-300 ease-out hover:brightness-110 hover:shadow-xl active:scale-95 focus:outline-none focus:ring-4 focus:ring-rose-300 dark:focus:ring-rose-600 disabled:opacity-60 disabled:cursor-not-allowed`}>
+                <FiSend className={`w-5 h-5 transition-transform ${loading ? 'animate-spin' : 'group-hover:translate-x-0.5'}`} /> {loading ? 'Sending…' : 'Send Message'}
               </button>
             </form>
           ) : (
@@ -162,7 +162,7 @@ export default function Contact() {
               <label className="flex items-center gap-2"><input type="checkbox" checked={eligAnswers.pregnant} onChange={(e)=>setEligAnswers({...eligAnswers, pregnant: e.target.checked})} /><span className="text-zinc-700 dark:text-zinc-300">Pregnant</span></label>
               <label className="flex items-center gap-2"><input type="checkbox" checked={eligAnswers.hasCold} onChange={(e)=>setEligAnswers({...eligAnswers, hasCold: e.target.checked})} /><span className="text-zinc-700 dark:text-zinc-300">Currently sick</span></label>
             </div>
-            <button type="button" onClick={checkEligibility} className="px-4 py-2 rounded-xl bg-red-600 dark:bg-red-700 text-white font-medium hover:bg-red-700 dark:hover:bg-red-600 transition w-full md:w-auto">Check Eligibility</button>
+            <button type="button" onClick={checkEligibility} className="group px-4 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 dark:from-rose-700 dark:to-red-700 text-white font-medium transition-all duration-300 ease-out hover:brightness-110 hover:shadow-lg active:scale-95 w-full md:w-auto">Check Eligibility <span className="transition-transform group-hover:translate-x-0.5">→</span></button>
             {eligResult !== null && (
               <div className={`px-4 py-3 rounded-2xl border ${eligResult? 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-700 text-emerald-700 dark:text-emerald-200':'bg-rose-50 dark:bg-rose-900/30 border-rose-200 dark:border-rose-700 text-rose-700 dark:text-rose-200'}`}>
                 <div className="flex items-center gap-2 font-semibold">
