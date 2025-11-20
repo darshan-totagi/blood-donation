@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FiMail, FiUser, FiMessageCircle, FiSend, FiPhone, FiMapPin, FiRotateCcw } from "react-icons/fi";
+import { FiMail, FiUser, FiMessageCircle, FiSend, FiPhone, FiMapPin, FiRotateCcw, FiCheckCircle, FiAlertTriangle } from "react-icons/fi";
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -39,6 +39,25 @@ export default function Contact() {
     localStorage.removeItem("contactDraft");
     setToast("Draft cleared");
     setTimeout(() => setToast(""), 1000);
+  };
+
+  const [eligAnswers, setEligAnswers] = useState({ age: '', weight: '', lastDonationMonths: '', hemoglobin: '', pregnant: false, hasCold: false });
+  const [eligResult, setEligResult] = useState(null);
+  const [eligReasons, setEligReasons] = useState([]);
+  const checkEligibility = () => {
+    const r = [];
+    const age = Number(eligAnswers.age);
+    const weight = Number(eligAnswers.weight);
+    const months = Number(eligAnswers.lastDonationMonths);
+    const hb = Number(eligAnswers.hemoglobin);
+    if (!age || age < 18 || age > 65) r.push("Age must be between 18 and 65");
+    if (!weight || weight < 50) r.push("Weight must be at least 50 kg");
+    if (!months || months < 3) r.push("Last donation should be at least 3 months ago");
+    if (!hb || hb < 12.5) r.push("Hemoglobin should be at least 12.5 g/dL");
+    if (eligAnswers.pregnant) r.push("Cannot donate while pregnant");
+    if (eligAnswers.hasCold) r.push("Postpone if currently sick");
+    setEligReasons(r);
+    setEligResult(r.length === 0);
   };
 
   const handleSubmit = async (e) => {
@@ -130,6 +149,35 @@ export default function Contact() {
             <div className="flex items-center gap-3"><FiMail className="w-5 h-5 text-rose-600 dark:text-rose-400" /><span>support@bloodconnect.org</span></div>
             <div className="flex items-center gap-3"><FiMapPin className="w-5 h-5 text-rose-600 dark:text-rose-400" /><span>123, Red Cross Street, Bengaluru</span></div>
           </div>
+
+          <div className="space-y-4">
+            <h4 className="text-xl font-semibold text-rose-700 dark:text-rose-300">Eligibility Checker</h4>
+            <div className="grid md:grid-cols-2 gap-3">
+              <input type="number" min="0" placeholder="Age" value={eligAnswers.age} onChange={(e)=>setEligAnswers({...eligAnswers, age: e.target.value})} className="w-full px-3 py-2 border rounded-xl dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100" />
+              <input type="number" min="0" placeholder="Weight (kg)" value={eligAnswers.weight} onChange={(e)=>setEligAnswers({...eligAnswers, weight: e.target.value})} className="w-full px-3 py-2 border rounded-xl dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100" />
+              <input type="number" min="0" placeholder="Months since last donation" value={eligAnswers.lastDonationMonths} onChange={(e)=>setEligAnswers({...eligAnswers, lastDonationMonths: e.target.value})} className="w-full px-3 py-2 border rounded-xl dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100" />
+              <input type="number" min="0" step="0.1" placeholder="Hemoglobin (g/dL)" value={eligAnswers.hemoglobin} onChange={(e)=>setEligAnswers({...eligAnswers, hemoglobin: e.target.value})} className="w-full px-3 py-2 border rounded-xl dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100" />
+            </div>
+            <div className="flex items-center gap-6 text-sm">
+              <label className="flex items-center gap-2"><input type="checkbox" checked={eligAnswers.pregnant} onChange={(e)=>setEligAnswers({...eligAnswers, pregnant: e.target.checked})} /><span className="text-zinc-700 dark:text-zinc-300">Pregnant</span></label>
+              <label className="flex items-center gap-2"><input type="checkbox" checked={eligAnswers.hasCold} onChange={(e)=>setEligAnswers({...eligAnswers, hasCold: e.target.checked})} /><span className="text-zinc-700 dark:text-zinc-300">Currently sick</span></label>
+            </div>
+            <button type="button" onClick={checkEligibility} className="px-4 py-2 rounded-xl bg-red-600 dark:bg-red-700 text-white font-medium hover:bg-red-700 dark:hover:bg-red-600 transition w-full md:w-auto">Check Eligibility</button>
+            {eligResult !== null && (
+              <div className={`px-4 py-3 rounded-2xl border ${eligResult? 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-700 text-emerald-700 dark:text-emerald-200':'bg-rose-50 dark:bg-rose-900/30 border-rose-200 dark:border-rose-700 text-rose-700 dark:text-rose-200'}`}>
+                <div className="flex items-center gap-2 font-semibold">
+                  {eligResult ? <FiCheckCircle className="w-5 h-5" /> : <FiAlertTriangle className="w-5 h-5" />}
+                  {eligResult ? 'You appear eligible to donate.' : 'Not eligible right now.'}
+                </div>
+                {!eligResult && eligReasons.length > 0 && (
+                  <ul className="mt-2 list-disc pl-5 text-sm">
+                    {eligReasons.map((r,i)=>(<li key={i}>{r}</li>))}
+                  </ul>
+                )}
+              </div>
+            )}
+          </div>
+
           <div className="rounded-2xl overflow-hidden border dark:border-zinc-800">
             <iframe title="BloodConnect HQ" src="https://maps.google.com/maps?q=Bengaluru&z=12&output=embed" className="w-full h-56" />
           </div>
