@@ -41,6 +41,20 @@ export default function Contact() {
     setTimeout(() => setToast(""), 1000);
   };
 
+  const resetForm = () => {
+    setFormData({ name: "", email: "", subject: "", message: "", category: "General" });
+    setErrors({});
+    localStorage.removeItem("contactDraft");
+    setToast("Form reset");
+    setTimeout(() => setToast(""), 1000);
+  };
+
+  const handleKeyDown = (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      handleSubmit(e);
+    }
+  };
+
   const [eligAnswers, setEligAnswers] = useState({ age: '', weight: '', lastDonationMonths: '', hemoglobin: '', pregnant: false, hasCold: false });
   const [eligResult, setEligResult] = useState(null);
   const [eligReasons, setEligReasons] = useState([]);
@@ -100,7 +114,7 @@ export default function Contact() {
         <div className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md rounded-3xl p-8 shadow-2xl border border-rose-100 dark:border-zinc-800">
           <h2 className="text-3xl font-bold text-rose-700 dark:text-rose-300 mb-6 text-center">Contact Us</h2>
           {!submitted ? (
-            <form onSubmit={handleSubmit} className="space-y-5 text-gray-700 dark:text-zinc-200">
+            <form id="contactForm" onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="space-y-5 text-gray-700 dark:text-zinc-200">
               <div className="flex flex-wrap gap-2">
                 {['General','Support','Feedback','Partnership'].map((c) => (
                   <button type="button" key={c} onClick={() => setFormData({ ...formData, category: c })} className={`px-3 py-1 rounded-full border text-sm transition duration-200 ease-out hover:scale-105 ${formData.category===c? 'bg-rose-600 text-white border-rose-600 dark:bg-rose-600 dark:border-rose-600 shadow-md':'bg-rose-50 text-rose-700 border-rose-200 dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700 hover:shadow'}`}>{c}</button>
@@ -130,12 +144,16 @@ export default function Contact() {
               </div>
               <div className="relative">
                 <FiMessageCircle className="absolute left-3 top-3.5 w-5 h-5 text-zinc-400 dark:text-zinc-500" />
-                <textarea name="message" value={formData.message} onChange={handleChange} placeholder="Your message..." rows="4" className={`w-full pl-10 pr-4 py-3 border rounded-2xl focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-400 outline-none resize-none dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100 dark:placeholder:text-zinc-400 ${errors.message? 'border-rose-400':''}`}></textarea>
+                <textarea name="message" value={formData.message} onChange={handleChange} placeholder="Your message..." rows="4" maxLength={500} className={`w-full pl-10 pr-4 py-3 border rounded-2xl focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-400 outline-none resize-none dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100 dark:placeholder:text-zinc-400 ${errors.message? 'border-rose-400':''}`}></textarea>
                 {errors.message && <div className="mt-1 text-xs text-rose-600 dark:text-rose-300">{errors.message}</div>}
+                <div className="mt-1 text-xs text-zinc-500 dark:text-zinc-400 text-right">{formData.message.length}/500</div>
               </div>
               {toast && <div className="px-4 py-3 rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-700 text-emerald-700 dark:text-emerald-200">{toast}</div>}
               <button type="submit" disabled={loading} className={`group w-full flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-rose-600 to-red-600 dark:from-rose-700 dark:to-red-700 text-white font-semibold shadow-lg transition-all duration-300 ease-out hover:brightness-110 hover:shadow-xl active:scale-95 focus:outline-none focus:ring-4 focus:ring-rose-300 dark:focus:ring-rose-600 disabled:opacity-60 disabled:cursor-not-allowed`}>
                 <FiSend className={`w-5 h-5 transition-transform ${loading ? 'animate-spin' : 'group-hover:translate-x-0.5'}`} /> {loading ? 'Sending…' : 'Send Message'}
+              </button>
+              <button type="button" onClick={resetForm} className="w-full mt-2 px-5 py-3 rounded-2xl border border-rose-300 dark:border-rose-700 text-rose-700 dark:text-rose-300 bg-white/60 dark:bg-zinc-800/60 hover:bg-white dark:hover:bg-zinc-700 transition">
+                Reset Form
               </button>
             </form>
           ) : (
