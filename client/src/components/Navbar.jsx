@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   FaHome,
@@ -33,6 +34,21 @@ function Navbar() {
     onScroll();
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  const API_URL = `${import.meta.env.VITE_API_URL}`;
+  const [requestsCount, setRequestsCount] = useState(0);
+  useEffect(() => {
+    let cancelled = false;
+    const fetchCount = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/api/requests`, { params: { status: 'open' } });
+        if (!cancelled) setRequestsCount(Array.isArray(res.data) ? res.data.length : 0);
+      } catch {}
+    };
+    fetchCount();
+    const id = setInterval(fetchCount, 60000);
+    return () => { cancelled = true; clearInterval(id); };
   }, []);
 
   const handleScrollNav = (hash) => {
@@ -97,7 +113,9 @@ function Navbar() {
             onClick={() => navigate("/requests")}
             className={`flex items-center gap-2 transition hover:text-gray-200 ${isActive('/requests') ? 'text-white underline decoration-white/40 underline-offset-4' : ''}`}
           >
-            <FaBell /> Requests
+            <FaBell /> Requests {requestsCount > 0 && (
+              <span className="ml-2 inline-flex items-center justify-center px-2 h-6 rounded-full bg-white/90 text-red-700 dark:bg-zinc-800 dark:text-red-300 text-xs font-bold border border-white/30 dark:border-zinc-700 animate-pulse">{requestsCount}</span>
+            )}
           </button>
 
           <button
@@ -168,7 +186,9 @@ function Navbar() {
             onClick={() => navigate("/requests")}
             className="flex items-center gap-3"
           >
-            <FaBell /> Requests
+            <FaBell /> Requests {requestsCount > 0 && (
+              <span className="ml-2 inline-flex items-center justify-center px-2 h-6 rounded-full bg-white/90 text-red-700 text-xs font-bold border border-white/30">{requestsCount}</span>
+            )}
           </button>
           <button
             onClick={() => navigate("/contact")}
