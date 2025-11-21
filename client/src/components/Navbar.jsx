@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -54,6 +54,33 @@ function Navbar() {
   const bloodGroups = ["A+","A-","B+","B-","AB+","AB-","O+","O-"];
   const [quickCity, setQuickCity] = useState("");
   const [quickBG, setQuickBG] = useState("");
+  const cityInputRef = useRef(null);
+  useEffect(() => {
+    const handler = (e) => {
+      const tag = (e.target.tagName || '').toLowerCase();
+      const isTyping = tag === 'input' || tag === 'textarea' || tag === 'select' || e.ctrlKey || e.metaKey;
+      if (!isTyping) {
+        if (e.key === '/') {
+          e.preventDefault();
+          cityInputRef.current?.focus();
+          return;
+        }
+        if (e.shiftKey) {
+          switch (e.key.toLowerCase()) {
+            case 'h': navigate('/'); break;
+            case 'r': navigate('/requests'); break;
+            case 's': navigate('/search'); break;
+            case 'c': navigate('/contact'); break;
+            case 'd': navigate('/register'); break;
+            case 't': setTheme(theme === 'dark' ? 'light' : 'dark'); break;
+            default: break;
+          }
+        }
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [navigate, theme]);
 
   const handleScrollNav = (hash) => {
     navigate("/");
@@ -116,6 +143,7 @@ function Navbar() {
             <input
               type="text"
               placeholder="City"
+              ref={cityInputRef}
               value={quickCity}
               onChange={(e)=>setQuickCity(e.target.value)}
               className="px-2 py-1 rounded-lg border border-white/30 bg-white/20 text-white placeholder:text-white/70 dark:bg-zinc-800 dark:text-zinc-100 dark:border-zinc-700"
