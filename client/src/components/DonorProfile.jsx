@@ -1,5 +1,5 @@
 // client/src/components/DonorProfile.jsx
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { FiUser, FiPhone, FiDroplet, FiMapPin, FiClock, FiChevronLeft } from "react-icons/fi";

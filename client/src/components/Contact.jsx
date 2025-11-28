@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { FiMail, FiUser, FiMessageCircle, FiSend, FiPhone, FiMapPin } from "react-icons/fi";
 
 export default function Contact() {
