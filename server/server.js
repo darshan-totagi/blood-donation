@@ -8,6 +8,7 @@ app.use(cors());
 app.use(express.json());
 
 const Donor = require('./models/Donor');
+const Request = require('./models/Request');
 
 // Basic health
 app.get('/', (req, res) => res.send({status: 'ok'}));
@@ -104,6 +105,53 @@ app.delete('/api/donors/:id', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'server error' });
+  }
+});
+
+// Requests
+app.get('/api/requests', async (req, res) => {
+  try {
+    const { status = 'open', bloodGroup, city } = req.query;
+    const filter = { status };
+    if (bloodGroup) filter.bloodGroup = bloodGroup;
+    if (city) filter.city = new RegExp(city, 'i');
+    const items = await Request.find(filter).sort({ neededBy: 1, createdAt: -1 }).limit(200);
+    res.json(items);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'server error' });
+  }
+});
+
+app.post('/api/requests', async (req, res) => {
+  try {
+    const data = req.body;
+    data.patientName = String(data.patientName || '').trim();
+    data.hospital = String(data.hospital || '').trim();
+    data.city = String(data.city || '').trim();
+    data.contactPhone = String(data.contactPhone || '').replace(/\D/g, '');
+    if (!data.patientName || data.patientName.length < 2) return res.status(400).json({ error: 'invalid patient name' });
+    if (!data.city) return res.status(400).json({ error: 'invalid city' });
+    if (!data.bloodGroup) return res.status(400).json({ error: 'invalid blood group' });
+    if (!data.contactPhone || data.contactPhone.length < 10 || data.contactPhone.length > 15) return res.status(400).json({ error: 'invalid contact phone' });
+    data.status = 'open';
+    const item = new Request(data);
+    await item.save();
+    res.status(201).json(item);
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.put('/api/requests/:id', async (req, res) => {
+  try {
+    const item = await Request.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!item) return res.status(404).json({ error: 'not found' });
+    res.json(item);
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ error: err.message });
   }
 });
 

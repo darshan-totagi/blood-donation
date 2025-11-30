@@ -16,6 +16,8 @@ import {
 
 function Navbar() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isActive = (path) => location.pathname === path;
   const [menuOpen, setMenuOpen] = useState(false);
   const [theme, setTheme] = useState('light');
   
@@ -34,6 +36,33 @@ function Navbar() {
     }
     localStorage.setItem('theme', theme);
   }, [theme]);
+
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  const API_URL = `${import.meta.env.VITE_API_URL}`;
+  const [requestsCount, setRequestsCount] = useState(0);
+  useEffect(() => {
+    let cancelled = false;
+    const fetchCount = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/api/requests`, { params: { status: 'open' } });
+        if (!cancelled) setRequestsCount(Array.isArray(res.data) ? res.data.length : 0);
+      } catch {}
+    };
+    fetchCount();
+    const id = setInterval(fetchCount, 60000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, []);
+
+  const bloodGroups = ["A+","A-","B+","B-","AB+","AB-","O+","O-"];
+  const [quickCity, setQuickCity] = useState("");
+  const [quickBG, setQuickBG] = useState("");
 
   const handleScrollNav = (hash) => {
     navigate("/");
@@ -57,7 +86,7 @@ function Navbar() {
   };
 
   return (
-    <nav className="fixed top-0 w-full bg-red-600/70 dark:bg-zinc-900/70 backdrop-blur-lg shadow-md z-50">
+    <nav className={`fixed top-0 w-full ${scrolled ? 'bg-red-600/80 dark:bg-zinc-900/80 shadow-lg' : 'bg-red-600/50 dark:bg-zinc-900/50 shadow-md'} backdrop-blur-lg z-50 transition-colors`}>
       <div className="container mx-auto flex justify-between items-center py-3 px-6">
         <h1
           onClick={() => navigate("/")}
@@ -71,37 +100,68 @@ function Navbar() {
         <div className="hidden md:flex gap-6 text-lg items-center text-white">
           <button
             onClick={() => navigate("/")}
-            className="flex items-center gap-2 hover:text-gray-200 transition"
+            className={`flex items-center gap-2 transition hover:text-gray-200 ${isActive('/') ? 'text-white underline decoration-white/40 underline-offset-4' : ''}`}
           >
             <FaHome /> Home
           </button>
 
           <button
             onClick={() => handleScrollNav("#why-donate")}
-            className="flex items-center gap-2 hover:text-gray-200 transition"
+            className="flex items-center gap-2 transition hover:text-gray-200"
           >
             <FaHandHoldingHeart /> Why Donate
           </button>
 
           <button
             onClick={() => handleScrollNav("#how-it-works")}
-            className="flex items-center gap-2 hover:text-gray-200 transition"
+            className="flex items-center gap-2 transition hover:text-gray-200"
           >
             <FaClipboardList /> How It Works
           </button>
 
           <button
             onClick={() => navigate("/register")}
-            className="flex items-center gap-2 hover:text-gray-200 transition"
+            className={`flex items-center gap-2 transition hover:text-gray-200 ${isActive('/register') ? 'text-white underline decoration-white/40 underline-offset-4' : ''}`}
           >
             <FaUserPlus /> Register
           </button>
 
           <button
             onClick={() => navigate("/search")}
-            className="flex items-center gap-2 hover:text-gray-200 transition"
+            className={`flex items-center gap-2 transition hover:text-gray-200 ${isActive('/search') ? 'text-white underline decoration-white/40 underline-offset-4' : ''}`}
           >
             <FaSearch /> Find Donors
+          </button>
+          <div className="flex items-center gap-2 ml-2">
+            <input
+              type="text"
+              placeholder="City"
+              value={quickCity}
+              onChange={(e)=>setQuickCity(e.target.value)}
+              className="px-2 py-1 rounded-lg border border-white/30 bg-white/20 text-white placeholder:text-white/70 dark:bg-zinc-800 dark:text-zinc-100 dark:border-zinc-700"
+              style={{width:'150px'}}
+            />
+            <select
+              value={quickBG}
+              onChange={(e)=>setQuickBG(e.target.value)}
+              className="px-2 py-1 rounded-lg border border-white/30 bg-white/20 text-white dark:bg-zinc-800 dark:text-zinc-100 dark:border-zinc-700"
+            >
+              <option value="">Any BG</option>
+              {bloodGroups.map(g=> (<option key={g} value={g}>{g}</option>))}
+            </select>
+            <button
+              onClick={()=>{ const qs = new URLSearchParams(); if (quickCity) qs.set('city', quickCity); if (quickBG) qs.set('bloodGroup', quickBG); navigate(`/search?${qs.toString()}`); }}
+              className="px-3 py-1 rounded-xl bg-white/90 text-red-700 dark:bg-zinc-800 dark:text-rose-300 border border-white/30 dark:border-zinc-700 hover:brightness-110 transition"
+            >Go</button>
+          </div>
+
+          <button
+            onClick={() => navigate("/requests")}
+            className={`flex items-center gap-2 transition hover:text-gray-200 ${isActive('/requests') ? 'text-white underline decoration-white/40 underline-offset-4' : ''}`}
+          >
+            <FaBell /> Requests {requestsCount > 0 && (
+              <span className="ml-2 inline-flex items-center justify-center px-2 h-6 rounded-full bg-white/90 text-red-700 dark:bg-zinc-800 dark:text-red-300 text-xs font-bold border border-white/30 dark:border-zinc-700 animate-pulse">{requestsCount}</span>
+            )}
           </button>
 
           {/* Map View Button */}
@@ -114,7 +174,7 @@ function Navbar() {
 
           <button
             onClick={() => navigate("/contact")}
-            className="flex items-center gap-2 hover:text-gray-200 transition"
+            className={`flex items-center gap-2 transition hover:text-gray-200 ${isActive('/contact') ? 'text-white underline decoration-white/40 underline-offset-4' : ''}`}
           >
             <FaPhoneAlt /> Contact
           </button>

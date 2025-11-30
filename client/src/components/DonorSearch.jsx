@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FiPhone, FiX, FiMapPin, FiDroplet, FiUser, FiClock, FiEdit2, FiCopy, FiTarget, FiCheck, FiAlertCircle } from "react-icons/fi";
+import { FiPhone, FiX, FiMapPin, FiDroplet, FiUser, FiClock, FiEdit2, FiCopy, FiTarget, FiCheck, FiAlertCircle, FiMessageCircle, FiDownload, FiSend, FiPrinter } from "react-icons/fi";
 
 const API_URL = `${import.meta.env.VITE_API_URL}/api/donors`;
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
@@ -21,6 +21,14 @@ function DonorSearch() {
   const [sortByDistance, setSortByDistance] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
   const [copyToast, setCopyToast] = useState("");
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState(() => new Set());
+  const [waTemplate, setWaTemplate] = useState("Hi {name}, we urgently need {bloodGroup} in {city}. Are you available to donate?");
+  const [radiusKm, setRadiusKm] = useState(25);
+  const [exportTitle, setExportTitle] = useState("Donor Roster");
+  const [exportFrom, setExportFrom] = useState("");
+  const [exportTo, setExportTo] = useState("");
+  const [exportPageSize, setExportPageSize] = useState(20);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -96,7 +104,8 @@ function DonorSearch() {
     (d) =>
       (filter.city === "" ||
         d.city?.toLowerCase().includes(filter.city.toLowerCase())) &&
-      (filter.bloodGroup === "" || d.bloodGroup === filter.bloodGroup)
+      (filter.bloodGroup === "" || d.bloodGroup === filter.bloodGroup) &&
+      (!userLocation || !radiusKm || (d.distanceKm != null && d.distanceKm <= radiusKm))
   );
   const finalDonors = sortByDistance
     ? [...filteredDonors].sort((a, b) => (a.distanceKm ?? 1e9) - (b.distanceKm ?? 1e9))
@@ -180,6 +189,82 @@ function DonorSearch() {
       },
       (err) => { setError(err.message || "Failed to get location"); setLocating(false); }
     );
+  };
+
+  const selectedDonors = enhanced.filter((d) => selectedIds.has(d._id));
+  const toggleSelect = (id) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+  const renderTemplateForDonor = (d) => waTemplate
+    .replace('{name}', d.name || '')
+    .replace('{bloodGroup}', d.bloodGroup || '')
+    .replace('{city}', d.city || '');
+  const handleCopySelectedPhones = () => {
+    const phones = selectedDonors.map((d) => d.phone).join(', ');
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(phones);
+      setCopyToast(`Copied ${selectedDonors.length} phone(s)`);
+      setTimeout(()=>setCopyToast(''), 1500);
+    }
+  };
+  const handleExportSelectedCSV = () => {
+    const header = 'Name,Phone,BloodGroup,City,DistanceKm';
+    const rows = selectedDonors.map((d) => [d.name, d.phone, d.bloodGroup, d.city || '', d.distanceKm ?? ''].join(','));
+    const csv = [header, ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'donors.csv'; a.click();
+    URL.revokeObjectURL(url);
+  };
+  const sendWhatsAppToSelected = () => {
+    let i = 0;
+    for (const d of selectedDonors) {
+      const phone = String(d.phone).replace(/\D/g, '');
+      const text = encodeURIComponent(renderTemplateForDonor(d));
+      const url = `https://wa.me/${phone}?text=${text}`;
+      setTimeout(() => window.open(url, '_blank'), i * 400);
+      i++;
+    }
+    setCopyToast(`Opened WhatsApp for ${selectedDonors.length} donor(s)`);
+    setTimeout(()=>setCopyToast(''), 1500);
+  };
+
+  const buildPrintableRoster = (items, opts) => {
+    const { title, from, to, pageSize } = opts;
+    const printDate = new Date().toLocaleString();
+    const style = `@page{margin:20mm} body{font-family:system-ui,-apple-system,Segoe UI,Roboto; padding:0; margin:0;} .page{padding:16px 24px; page-break-after:always;} .header{display:flex; align-items:center; gap:12px; margin-bottom:12px;} .logo{width:28px; height:28px} h1{font-size:18px; margin:0} .meta{font-size:12px; color:#6b7280} table{width:100%; border-collapse:collapse} th,td{border:1px solid #e5e7eb; padding:6px 8px; font-size:12px} th{background:#f9fafb; text-align:left} tr:nth-child(even){background:#fafafa} .footer{margin-top:8px; font-size:12px; color:#6b7280; display:flex; justify-content:space-between}`;
+    const pages = [];
+    for (let i=0;i<items.length;i+=pageSize) pages.push(items.slice(i,i+pageSize));
+    const svg = `<svg class='logo' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path fill='#ef4444' d='M12 2c3 4 8 8 8 13a8 8 0 1 1-16 0c0-5 5-9 8-13z'/></svg>`;
+    const dateRange = (from||to) ? `Date range: ${from||'—'} to ${to||'—'}` : '';
+    const htmlPages = pages.map((page, idx) => {
+      const rows = page.map((d) => `<tr><td>${d.name||''}</td><td>${d.phone||''}</td><td>${d.bloodGroup||''}</td><td>${d.city||''}</td><td>${d.distanceKm!=null?d.distanceKm:''}</td></tr>`).join('');
+      return `<div class='page'><div class='header'>${svg}<div><h1>${title||'Donor Roster'}</h1><div class='meta'>${dateRange}</div></div></div><table><thead><tr><th>Name</th><th>Phone</th><th>Blood Group</th><th>City</th><th>Distance (km)</th></tr></thead><tbody>${rows}</tbody></table><div class='footer'><span>Printed: ${printDate}</span><span>Page ${idx+1} of ${pages.length}</span></div></div>`;
+    }).join('');
+    return `<!doctype html><html><head><meta charset='utf-8'><title>${title||'Donor Roster'}</title><style>${style}</style></head><body>${htmlPages}</body></html>`;
+  };
+  const handleExportSelectedPDF = () => {
+    const base = selectedDonors.length ? selectedDonors : finalDonors;
+    const filtered = base.filter((d) => {
+      if (!exportFrom && !exportTo) return true;
+      const dt = d.lastDonatedAt ? new Date(d.lastDonatedAt) : null;
+      if (!dt || isNaN(dt.getTime())) return false;
+      const fromOk = exportFrom ? new Date(exportFrom) <= dt : true;
+      const toOk = exportTo ? dt <= new Date(exportTo) : true;
+      return fromOk && toOk;
+    });
+    const html = buildPrintableRoster(filtered, { title: exportTitle, from: exportFrom, to: exportTo, pageSize: exportPageSize || 20 });
+    const w = window.open('', '_blank');
+    if (!w) return;
+    w.document.write(html);
+    w.document.close();
+    w.focus();
+    setTimeout(() => w.print(), 300);
   };
 
   return (
@@ -284,6 +369,42 @@ function DonorSearch() {
 
         {/* Donor List */}
         <div className="bg-white p-6 rounded-3xl shadow-lg border border-rose-200 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <label className="text-sm text-zinc-600">Select</label>
+              <input type="checkbox" checked={selectionMode} onChange={(e)=>{ setSelectionMode(e.target.checked); if(!e.target.checked) setSelectedIds(new Set()); }} className="accent-rose-600" />
+              {selectionMode && selectedIds.size > 0 && (
+                <span className="text-sm text-zinc-700">{selectedIds.size} selected</span>
+              )}
+            </div>
+            {selectionMode && selectedIds.size > 0 && (
+              <div className="flex flex-wrap items-center gap-2">
+                <input
+                  value={waTemplate}
+                  onChange={(e)=>setWaTemplate(e.target.value)}
+                  placeholder="WhatsApp template. Use {name} {bloodGroup} {city}"
+                  className="px-3 py-2 rounded-2xl border border-zinc-300 text-sm w-64"
+                />
+                <input
+                  value={exportTitle}
+                  onChange={(e)=>setExportTitle(e.target.value)}
+                  placeholder="PDF title"
+                  className="px-3 py-2 rounded-2xl border border-zinc-300 text-sm w-40"
+                />
+                <input type="date" value={exportFrom} onChange={(e)=>setExportFrom(e.target.value)} className="px-3 py-2 rounded-2xl border border-zinc-300 text-sm" />
+                <input type="date" value={exportTo} onChange={(e)=>setExportTo(e.target.value)} className="px-3 py-2 rounded-2xl border border-zinc-300 text-sm" />
+                <select value={exportPageSize} onChange={(e)=>setExportPageSize(Number(e.target.value))} className="px-3 py-2 rounded-2xl border border-zinc-300 text-sm">
+                  <option value={10}>10/pg</option>
+                  <option value={20}>20/pg</option>
+                  <option value={30}>30/pg</option>
+                </select>
+                <button onClick={sendWhatsAppToSelected} className="px-3 py-2 rounded-2xl bg-green-500 text-white hover:bg-green-600 text-sm flex items-center gap-2"><FiSend className="w-4 h-4" /> Send WhatsApp</button>
+                <button onClick={handleCopySelectedPhones} className="px-3 py-2 rounded-2xl border border-emerald-300 text-emerald-700 hover:bg-emerald-50 text-sm">Copy Phones</button>
+                <button onClick={handleExportSelectedCSV} className="px-3 py-2 rounded-2xl border border-zinc-300 text-zinc-700 hover:bg-zinc-50 text-sm flex items-center gap-2"><FiDownload className="w-4 h-4" /> Export CSV</button>
+                <button onClick={handleExportSelectedPDF} className="px-3 py-2 rounded-2xl border border-zinc-300 text-zinc-700 hover:bg-zinc-50 text-sm flex items-center gap-2"><FiPrinter className="w-4 h-4" /> Export PDF</button>
+              </div>
+            )}
+          </div>
           {copyToast && (
             <div className="px-4 py-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center gap-2"><FiCheck className="w-4 h-4" /> {copyToast}</div>
           )}
@@ -302,7 +423,7 @@ function DonorSearch() {
             finalDonors.map((d, i) => (
               <div
                 key={i}
-                className="p-5 border rounded-3xl bg-gradient-to-br from-rose-50 via-white to-rose-50 shadow-sm hover:shadow-lg transition flex items-center justify-between gap-4"
+                className="p-5 border rounded-3xl border-l-4 border-rose-300 bg-gradient-to-br from-rose-50 via-white to-rose-50 shadow-sm hover:shadow-lg transition flex items-center justify-between gap-4"
               >
                 <div>
                   <h3
@@ -346,6 +467,9 @@ function DonorSearch() {
                 </div>
 
                 <div className="flex items-center gap-3">
+                  {selectionMode && (
+                    <input type="checkbox" checked={selectedIds.has(d._id)} onChange={()=>toggleSelect(d._id)} className="accent-rose-600" />
+                  )}
                   {d.allowCall && (
                     <a
                       href={`tel:${d.phone}`}
@@ -361,6 +485,20 @@ function DonorSearch() {
                     title="Copy Phone"
                   >
                     <FiCopy className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => { const url = `${window.location.origin}/donor/${d._id}`; if (navigator.clipboard) { navigator.clipboard.writeText(url); setCopyToast('Link copied'); setTimeout(()=> setCopyToast(''), 1500); } }}
+                    className="w-12 h-12 flex items-center justify-center rounded-full border border-zinc-300 text-zinc-700 hover:bg-zinc-50 transition"
+                    title="Copy Profile Link"
+                  >
+                    <FiShare2 className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => toggleFavorite(d._id)}
+                    className={`w-12 h-12 flex items-center justify-center rounded-full border transition ${favorites.has(d._id) ? 'bg-yellow-100 text-yellow-700 border-yellow-300' : 'border-rose-300 text-rose-700 hover:bg-rose-50'}`}
+                    title="Favorite"
+                  >
+                    <FiStar className="w-5 h-5" />
                   </button>
                 </div>
               </div>
