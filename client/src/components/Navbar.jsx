@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   FaHome,
   FaHandHoldingHeart,
@@ -12,8 +11,7 @@ import {
   FaTimes,
   FaMoon,
   FaSun,
-  FaBell,
-  FaTint,
+  FaMapMarkerAlt
 } from "react-icons/fa";
 
 function Navbar() {
@@ -21,10 +19,21 @@ function Navbar() {
   const location = useLocation();
   const isActive = (path) => location.pathname === path;
   const [menuOpen, setMenuOpen] = useState(false);
-  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
+  const [theme, setTheme] = useState('light');
+  
+  // Hook calls properly placed inside the function component
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    setTheme(savedTheme);
+  }, []);
+
   useEffect(() => {
     const root = document.documentElement;
-    if (theme === 'dark') root.classList.add('dark'); else root.classList.remove('dark');
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
     localStorage.setItem('theme', theme);
   }, [theme]);
 
@@ -65,19 +74,30 @@ function Navbar() {
     }, 120);
   };
 
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
+
+  const handleMobileMenuClick = (action) => {
+    setMenuOpen(false);
+    if (typeof action === 'function') {
+      action();
+    }
+  };
+
   return (
     <nav className={`fixed top-0 w-full ${scrolled ? 'bg-red-600/80 dark:bg-zinc-900/80 shadow-lg' : 'bg-red-600/50 dark:bg-zinc-900/50 shadow-md'} backdrop-blur-lg z-50 transition-colors`}>
       <div className="container mx-auto flex justify-between items-center py-3 px-6">
         <h1
           onClick={() => navigate("/")}
-          className="text-2xl font-extrabold tracking-wide cursor-pointer flex items-center gap-2"
+          className="text-2xl font-extrabold tracking-wide cursor-pointer flex items-center gap-2 text-white"
         >
           <FaHandHoldingHeart className="text-white" />
           BloodConnect
         </h1>
 
         {/* Desktop Menu */}
-        <div className="hidden md:flex gap-8 text-lg items-center">
+        <div className="hidden md:flex gap-6 text-lg items-center text-white">
           <button
             onClick={() => navigate("/")}
             className={`flex items-center gap-2 transition hover:text-gray-200 ${isActive('/') ? 'text-white underline decoration-white/40 underline-offset-4' : ''}`}
@@ -144,31 +164,34 @@ function Navbar() {
             )}
           </button>
 
+          {/* Map View Button */}
+          <button
+            onClick={() => navigate("/map")}
+            className="flex items-center gap-2 hover:text-gray-200 transition"
+          >
+            <FaMapMarkerAlt /> Map View
+          </button>
+
           <button
             onClick={() => navigate("/contact")}
             className={`flex items-center gap-2 transition hover:text-gray-200 ${isActive('/contact') ? 'text-white underline decoration-white/40 underline-offset-4' : ''}`}
           >
             <FaPhoneAlt /> Contact
           </button>
+
           <button
-            onClick={() => navigate('/register')}
-            className="group flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 dark:from-rose-700 dark:to-red-700 text-white shadow-md hover:brightness-110 hover:shadow-lg transition-all active:scale-95"
-            title="Donate Now"
-          >
-            <FaTint className="w-4 h-4" /> Donate Now
-          </button>
-          <button
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            onClick={toggleTheme}
             className="flex items-center gap-2 px-3 py-1 rounded-2xl border border-white/30 hover:bg-white/10 transition"
             title="Toggle theme"
           >
-            {theme === 'dark' ? <FaSun /> : <FaMoon />} {theme === 'dark' ? 'Light' : 'Dark'}
+            {theme === 'dark' ? <FaSun /> : <FaMoon />} 
+            {theme === 'dark' ? 'Light' : 'Dark'}
           </button>
         </div>
 
         {/* Mobile Menu Toggle */}
         <button
-          className="md:hidden text-2xl"
+          className="md:hidden text-2xl text-white"
           onClick={() => setMenuOpen(!menuOpen)}
         >
           {menuOpen ? <FaTimes /> : <FaBars />}
@@ -177,72 +200,59 @@ function Navbar() {
 
       {/* Mobile Dropdown */}
       {menuOpen && (
-        <div className="md:hidden bg-red-600/85 px-6 py-4 space-y-4 text-lg">
+        <div className="md:hidden bg-red-600/85 px-6 py-4 space-y-4 text-lg text-white">
           <button
-            onClick={() => navigate("/")}
-            className="flex items-center gap-3"
+            onClick={() => handleMobileMenuClick(() => navigate("/"))}
+            className="flex items-center gap-3 w-full text-left"
           >
             <FaHome /> Home
           </button>
           <button
-            onClick={() => handleScrollNav("#why-donate")}
-            className="flex items-center gap-3"
+            onClick={() => handleMobileMenuClick(() => handleScrollNav("#why-donate"))}
+            className="flex items-center gap-3 w-full text-left"
           >
             <FaHandHoldingHeart /> Why Donate
           </button>
           <button
-            onClick={() => handleScrollNav("#how-it-works")}
-            className="flex items-center gap-3"
+            onClick={() => handleMobileMenuClick(() => handleScrollNav("#how-it-works"))}
+            className="flex items-center gap-3 w-full text-left"
           >
             <FaClipboardList /> How It Works
           </button>
           <button
-            onClick={() => navigate("/register")}
-            className="flex items-center gap-3"
+            onClick={() => handleMobileMenuClick(() => navigate("/register"))}
+            className="flex items-center gap-3 w-full text-left"
           >
             <FaUserPlus /> Register
           </button>
           <button
-            onClick={() => navigate("/search")}
-            className="flex items-center gap-3"
+            onClick={() => handleMobileMenuClick(() => navigate("/search"))}
+            className="flex items-center gap-3 w-full text-left"
           >
             <FaSearch /> Find Donors
           </button>
-          <div className="space-y-2">
-            <input type="text" placeholder="City" value={quickCity} onChange={(e)=>setQuickCity(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-white/30 bg-white/80 text-red-700 placeholder:text-red-700/70" />
-            <select value={quickBG} onChange={(e)=>setQuickBG(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-white/30 bg-white/80 text-red-700">
-              <option value="">Any BG</option>
-              {bloodGroups.map(g=> (<option key={g} value={g}>{g}</option>))}
-            </select>
-            <button onClick={()=>{ const qs = new URLSearchParams(); if (quickCity) qs.set('city', quickCity); if (quickBG) qs.set('bloodGroup', quickBG); navigate(`/search?${qs.toString()}`); setMenuOpen(false); }} className="w-full px-3 py-2 rounded-xl bg-white/90 text-red-700 border border-white/30 hover:brightness-110 transition">Go</button>
-          </div>
+          
+          {/* Map View in Mobile Menu */}
           <button
-            onClick={() => navigate("/requests")}
-            className="flex items-center gap-3"
+            onClick={() => handleMobileMenuClick(() => navigate("/map"))}
+            className="flex items-center gap-3 w-full text-left"
           >
-            <FaBell /> Requests {requestsCount > 0 && (
-              <span className="ml-2 inline-flex items-center justify-center px-2 h-6 rounded-full bg-white/90 text-red-700 text-xs font-bold border border-white/30">{requestsCount}</span>
-            )}
+            <FaMapMarkerAlt /> Map View
           </button>
+          
           <button
-            onClick={() => navigate("/contact")}
-            className="flex items-center gap-3"
+            onClick={() => handleMobileMenuClick(() => navigate("/contact"))}
+            className="flex items-center gap-3 w-full text-left"
           >
             <FaPhoneAlt /> Contact
           </button>
+          
           <button
-            onClick={() => navigate('/register')}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 dark:from-rose-700 dark:to-red-700 text-white shadow-md hover:brightness-110 hover:shadow-lg transition-all active:scale-95"
-            title="Donate Now"
+            onClick={() => handleMobileMenuClick(toggleTheme)}
+            className="flex items-center gap-3 w-full text-left"
           >
-            <FaTint className="w-5 h-5" /> Donate Now
-          </button>
-          <button
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="flex items-center gap-3 px-3 py-2 rounded-xl border border-white/30 hover:bg-white/10 transition"
-            title="Toggle theme"
-          >
-            {theme === 'dark' ? <FaSun /> : <FaMoon />} {theme === 'dark' ? 'Light' : 'Dark'}
+            {theme === 'dark' ? <FaSun /> : <FaMoon />} 
+            {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
           </button>
         </div>
       )}

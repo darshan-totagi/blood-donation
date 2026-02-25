@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { FiMail, FiUser, FiMessageCircle, FiSend, FiPhone, FiMapPin, FiRotateCcw, FiCheckCircle, FiAlertTriangle } from "react-icons/fi";
+import { useState } from "react";
+import { FiMail, FiUser, FiMessageCircle, FiSend, FiPhone, FiMapPin } from "react-icons/fi";
 
 export default function Contact() {
   const [formData, setFormData] = useState({

@@ -5,3 +5,54 @@
 
 html, body, #root { height: 100%; }
 body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
+
+/* Custom map styles */
+.leaflet-container {
+  border-radius: 12px;
+  font-family: inherit;
+}
+
+.blood-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+.user-location-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Custom popup styles */
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.leaflet-popup-content {
+  margin: 12px;
+  line-height: 1.4;
+  font-family: inherit;
+}
+
+.leaflet-popup-tip {
+  box-shadow: none;
+}
+
+/* Scrollbar styling for donor list */
+.donor-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.donor-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.donor-list::-webkit-scrollbar-thumb {
+  background: #dc2626;
+  border-radius: 3px;
+}
+
+.donor-list::-webkit-scrollbar-thumb:hover {
+  background: #b91c1c;
+}
